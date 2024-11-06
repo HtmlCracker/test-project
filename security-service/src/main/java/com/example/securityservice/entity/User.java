@@ -1,16 +1,19 @@
 package com.example.securityservice.entity;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "email")
@@ -26,6 +29,13 @@ public class User {
     private boolean isEnabled;
 
     public User() {
+    }
+
+    public User(String email, String password, LocalDateTime createdAt, boolean isEnabled) {
+        this.email = email;
+        this.password = password;
+        this.createdAt = createdAt;
+        this.isEnabled = isEnabled;
     }
 
     public UUID getId() {
@@ -62,5 +72,15 @@ public class User {
 
     public void setEnabled(boolean enabled) {
         isEnabled = enabled;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
     }
 }
