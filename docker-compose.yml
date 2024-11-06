@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  consul:
+    image: consul:1.1.0
+    hostname: consul
+    ports:
+      - '8500:8500'
+  usersDB:
+    image: postgres:alpine
+    hostname: usersDB
+    container_name: usersDB
+    ports:
+      - '5438:5432'
+    environment:
+      POSTGRES_DB: usersDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - ./usersDB:/data
