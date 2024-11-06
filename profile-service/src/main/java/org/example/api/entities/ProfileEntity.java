@@ -1,4 +1,4 @@
-package org.example.store.entities;
+package org.example.api.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,8 +24,6 @@ public class ProfileEntity {
     UUID id;
 
     String email;
-
-    String password;
 
     String name;
 

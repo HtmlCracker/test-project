@@ -21,9 +21,6 @@ public class ProfileDto {
     String email;
 
     @NonNull
-    String password;
-
-    @NonNull
     String name;
 
     String surname;

@@ -1,7 +1,7 @@
 package org.example.api.factories;
 
 import org.example.api.dto.ProfileDto;
-import org.example.store.entities.ProfileEntity;
+import org.example.api.entities.ProfileEntity;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -10,7 +10,6 @@ public class ProfileDtoFactory {
         return ProfileDto.builder()
                 .id(entity.getId())
                 .email(entity.getEmail())
-                .password(entity.getPassword())
                 .name(entity.getName())
                 .surname(entity.getSurname())
                 .description(entity.getDescription())
