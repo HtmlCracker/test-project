@@ -8,6 +8,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -33,7 +34,7 @@ public class ProfileEntity {
     @Builder.Default
     String description = null;
 
-    ArrayList<String> roles;
+    List<String> roles;
 
     @Builder.Default
     Instant registrationDate = Instant.now(Clock.system(ZoneId.of("Europe/Moscow")));
