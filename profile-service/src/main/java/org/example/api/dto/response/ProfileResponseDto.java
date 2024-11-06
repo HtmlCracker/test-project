@@ -1,11 +1,11 @@
-package org.example.api.dto;
+package org.example.api.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProfileDto {
+public class ProfileResponseDto {
     @NonNull
     UUID id;
 
@@ -28,7 +28,7 @@ public class ProfileDto {
     String description;
 
     @NonNull
-    ArrayList<String> roles;
+    List<String> roles;
 
     @JsonProperty("registration_date")
     @NonNull
