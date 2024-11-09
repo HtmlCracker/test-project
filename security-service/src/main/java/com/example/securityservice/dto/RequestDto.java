@@ -1,12 +1,12 @@
 package com.example.securityservice.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public class RequestDto {
     @Email(message = "Email should be valid")
     private String email;
-    @NotNull(message = "Password shouldn't be empty")
+    @NotBlank(message = "Password shouldn't be empty")
     private String password;
 
     public String getEmail() {
