@@ -16,7 +16,7 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> userNotFound(EntityNotFoundException e){
-        ErrorResponse response = new ErrorResponse("User not found", LocalDateTime.now());
+        ErrorResponse response = new ErrorResponse("Entity not found", LocalDateTime.now());
         return new ResponseEntity<>(response, HttpStatusCode.valueOf(404));
     }
 

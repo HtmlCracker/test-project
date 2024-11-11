@@ -1,8 +1,10 @@
 package com.example.securityservice.controller;
 
 import com.example.securityservice.dto.RequestDto;
+import com.example.securityservice.entity.RefreshToken;
 import com.example.securityservice.entity.User;
 import com.example.securityservice.service.JwtService;
+import com.example.securityservice.service.RefreshTokenService;
 import com.example.securityservice.service.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.persistence.EntityNotFoundException;
@@ -11,22 +13,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
     private final UserService userService;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
 
     @Autowired
-    public AuthController(UserService userService, JwtService jwtService, AuthenticationManager authenticationManager) {
+    public AuthController(UserService userService, JwtService jwtService, RefreshTokenService refreshTokenService, AuthenticationManager authenticationManager) {
         this.userService = userService;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
         this.authenticationManager = authenticationManager;
     }
 
@@ -57,9 +58,15 @@ public class AuthController {
                 requestDto.getEmail(),
                 requestDto.getPassword()));
         if (authentication.isAuthenticated())
-            return jwtService.generateToken(user);
+            return "Your JWT token: " + jwtService.generateToken(user) + "\n" +
+                    "Your Refresh token: " + refreshTokenService.createRefreshToken(user);
 
         return "Invalid username or password";
+    }
+
+    @PostMapping("/refresh")
+    public String refresh(@RequestBody String token){
+        return refreshTokenService.refreshJwt(token);
     }
 
     @GetMapping("/validate")
