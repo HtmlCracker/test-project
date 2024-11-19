@@ -1,14 +1,14 @@
 server:
-  port: 0
+  port: 45291
 
 spring:
   application:
     name: profile-service
 
   datasource:
-    url:
-    username:
-    password:
+    url: jdbc:postgresql://profileDb:5432/profileDb
+    username: postgres
+    password: postgres
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -17,3 +17,8 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+
+  cloud:
+    consul:
+      host: http://consul
+      port: 8500

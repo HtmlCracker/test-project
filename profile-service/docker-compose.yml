@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  profile-service:
+    container_name: service
+    build: ./
+    depends_on:
+      - profileDb
+      - consul
+    ports:
+      - 45291:45291
+
+  profileDb:
+    image: postgres:alpine
+    restart: unless-stopped
+    hostname: profileDb
+    container_name: profileDb
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: profileDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - ./profileDb:/data
+
+
+  consul:
+    container_name: consul
+    image: consul:1.1.0
+    hostname: consul
+    ports:
+      - 8500:8500
