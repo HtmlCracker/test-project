@@ -24,20 +24,9 @@ public class ProfileService {
 
 
     public ProfileEntity registerProfile(ProfileRegistrationRequestDto dto) {
-        ProfileEntity profileEntity = buildProfileEntityOrThrowException(dto);
-        return profileRepository.save(profileEntity);
-    }
-
-    private ProfileEntity buildProfileEntityOrThrowException(ProfileRegistrationRequestDto dto) {
         throwExceptionIfProfileWithEmailAlreadyExists(dto.getEmail());
-
-        return ProfileEntity.builder()
-                .email(dto.getEmail())
-                .name(dto.getName())
-                .surname(dto.getSurname())
-                .description(dto.getDescription())
-                .roles(getRolesListByString(dto.getRoles()))
-                .build();
+        ProfileEntity profileEntity = buildProfileEntity(dto);
+        return profileRepository.save(profileEntity);
     }
 
     private void throwExceptionIfProfileWithEmailAlreadyExists(String email) {
@@ -45,6 +34,16 @@ public class ProfileService {
                 .ifPresent((profile -> {
                     throw new BadRequestException(String.format("Account with email \"%s\" already exists.", email));
                 }));
+    }
+
+    private ProfileEntity buildProfileEntity(ProfileRegistrationRequestDto dto) {
+        return ProfileEntity.builder()
+                .email(dto.getEmail())
+                .name(dto.getName())
+                .surname(dto.getSurname())
+                .description(dto.getDescription())
+                .roles(getRolesListByString(dto.getRoles()))
+                .build();
     }
 
     private List<String> getRolesListByString(String rolesString) {
@@ -57,9 +56,7 @@ public class ProfileService {
 
     public ProfileEntity updateProfile(UUID profileId, ProfileUpdateRequestDto dto) {
         ProfileEntity existingProfileEntity = getProfileByIdOrThrowException(profileId);
-
-        ProfileEntity updatedProfileEntity = updateProfileEntity(existingProfileEntity, dto);
-
+        ProfileEntity updatedProfileEntity = mergeProfileUpdatesIntoEntity(existingProfileEntity, dto);
         return profileRepository.save(updatedProfileEntity);
     }
 
@@ -68,7 +65,7 @@ public class ProfileService {
                 .orElseThrow(() -> new NotFoundException(String.format("Account with id \"%s\" does not exist", id)));
     }
 
-    private ProfileEntity updateProfileEntity(ProfileEntity profileEntity,
+    private ProfileEntity mergeProfileUpdatesIntoEntity(ProfileEntity profileEntity,
                                               ProfileUpdateRequestDto updatedDto) {
         profileEntity.setEmail(updatedDto.getEmail());
         profileEntity.setName(updatedDto.getName());
