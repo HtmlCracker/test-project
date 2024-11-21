@@ -3,7 +3,7 @@ version: '3.8'
 services:
   profile-service:
     container_name: service
-    build: ./
+    build: profile-service
     depends_on:
       - profileDb
       - consul
