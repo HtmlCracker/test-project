@@ -1,17 +1,27 @@
 version: '3'
 
 services:
+  security-service:
+    container_name: security-service
+    build: ./security-service
+    ports:
+      - '8765:8765'
+    depends_on:
+      - consul
+      - usersDB
+
   consul:
     image: consul:1.1.0
     hostname: consul
     ports:
       - '8500:8500'
+
   usersDB:
     image: postgres:alpine
-    hostname: usersDB
     container_name: usersDB
+    hostname: usersDB
     ports:
-      - '5438:5432'
+      - '5430:5432'
     environment:
       POSTGRES_DB: usersDB
       POSTGRES_USER: postgres

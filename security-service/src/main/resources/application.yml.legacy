@@ -1,7 +1,26 @@
 spring:
   application:
     name: security-service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://usersDB:5432/usersDB
+    username: postgres
+    password: postgres
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+  cloud:
+    consul:
+      port: 8500
+      host: consul
 server:
-  port: 8085
+  port: 8765
 
 jwt_secret:

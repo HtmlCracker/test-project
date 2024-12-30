@@ -28,7 +28,7 @@ public class RefreshTokenService {
                 user);
         Optional<RefreshToken> oldToken = refreshTokenRepository.findByUser(user);
         if (oldToken.isPresent())
-            refreshTokenRepository.delete(oldToken);
+            refreshTokenRepository.deleteByUser(user);
         refreshTokenRepository.save(refreshToken);
         return refreshToken.getToken();
     }

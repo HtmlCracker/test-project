@@ -36,6 +36,8 @@ public class UserService {
 
     @Transactional
     public String save(RequestDto requestDto){
+        if (userRepository.findByEmail(requestDto.getEmail()).isPresent())
+            return "This email has already registered";
         User user = new User(
                 requestDto.getEmail(),
                 passwordEncoder.encode(requestDto.getPassword()),
