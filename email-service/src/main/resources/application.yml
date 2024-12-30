@@ -1,0 +1,34 @@
+server:
+  port: 45292
+
+spring:
+  application:
+    name: email-sender-service
+
+  kafka:
+    producer:
+      bootstrap-servers: kafka:29092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      bootstrap-servers: kafka:29092
+      group-id: group_id
+      auto-offset-reset: earliest
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+  mail:
+    username: ${EMAIL_USERNAME}
+    password: ${EMAIL_PASSWORD}
+    host: smtp.yandex.ru
+    port: 587
+    protocol: smtp
+    properties:
+      "mail.transport.protocol": smtp
+      "mail.smtp.auth": true
+      "mail.smtp.starttls.enable": true
+
+  cloud:
+    consul:
+      host: http://consul
+      port: 8500

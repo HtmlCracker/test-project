@@ -109,7 +109,6 @@ public class ProfileControllerTest {
 
         MvcResult result = mockMvc.perform(request)
                 .andExpect(status().isBadRequest()).andReturn();
-
     }
 
     void registerProfile_WithSomeEmailAndName_ShouldThrowOk(String email, String name) throws Exception {
