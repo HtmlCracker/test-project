@@ -1,11 +1,13 @@
 spring:
   application:
     name: security-service
+  config:
+    import: application.env[.properties]
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://usersDB:5432/usersDB
-    username: postgres
-    password: postgres
+    username: ${USERNAME}
+    password: ${PASSWORD}
   jpa:
     properties:
       hibernate:
@@ -19,8 +21,10 @@ spring:
   cloud:
     consul:
       port: 8500
-      host: consul
+      host: http://consul
+      discovery:
+        health-check-url: http://security-service:8765/actuator/health
 server:
   port: 8765
 
-jwt_secret:
+jwt_secret: ${JWT_SECRET}

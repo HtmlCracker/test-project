@@ -3,6 +3,7 @@ version: '3'
 services:
   security-service:
     container_name: security-service
+    env_file: ./security-service/src/main/resources/application.env
     build: ./security-service
     ports:
       - '8765:8765'

@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -45,12 +46,11 @@ public class AuthControllerTest {
     @Test
     void save_withEverythingOk() throws Exception {
         RequestDto requestDto = new RequestDto("test@mail.com", "password");
-        String requestJson = objectMapper.writeValueAsString(requestDto);
-        var result = mockMvc.perform(post("http://localhost:8765/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
+
+        var result = sendRegisterRequest(requestDto)
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
+
         assertThat(result.getResponse().getContentAsString()
                 .equals("User has been registered"));
     }
@@ -58,12 +58,11 @@ public class AuthControllerTest {
     @Test
     void save_withInvalidEmail1() throws Exception {
         RequestDto requestDto = new RequestDto("test@mailcom", "password");
-        String requestJson = objectMapper.writeValueAsString(requestDto);
-        var result = mockMvc.perform(post("http://localhost:8765/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
+
+        var result = sendRegisterRequest(requestDto)
                 .andExpect(status().is4xxClientError())
                 .andReturn();
+
         assertThat(result.getResponse().getContentAsString()
                 .equals("Email should be valid"));
     }
@@ -71,12 +70,11 @@ public class AuthControllerTest {
     @Test
     void save_withInvalidEmail2() throws Exception {
         RequestDto requestDto = new RequestDto("test@mail.", "password");
-        String requestJson = objectMapper.writeValueAsString(requestDto);
-        var result = mockMvc.perform(post("http://localhost:8765/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
+
+        var result = sendRegisterRequest(requestDto)
                 .andExpect(status().is4xxClientError())
                 .andReturn();
+
         assertThat(result.getResponse().getContentAsString()
                 .equals("Email should be valid"));
     }
@@ -84,12 +82,11 @@ public class AuthControllerTest {
     @Test
     void save_withInvalidEmail3() throws Exception {
         RequestDto requestDto = new RequestDto("test@.com", "password");
-        String requestJson = objectMapper.writeValueAsString(requestDto);
-        var result = mockMvc.perform(post("http://localhost:8765/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
+
+        var result = sendRegisterRequest(requestDto)
                 .andExpect(status().is4xxClientError())
                 .andReturn();
+
         assertThat(result.getResponse().getContentAsString()
                 .equals("Email should be valid"));
     }
@@ -97,12 +94,11 @@ public class AuthControllerTest {
     @Test
     void save_withInvalidEmail4() throws Exception {
         RequestDto requestDto = new RequestDto("testmail.com", "password");
-        String requestJson = objectMapper.writeValueAsString(requestDto);
-        var result = mockMvc.perform(post("http://localhost:8765/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
+
+        var result = sendRegisterRequest(requestDto)
                 .andExpect(status().is4xxClientError())
                 .andReturn();
+
         assertThat(result.getResponse().getContentAsString()
                 .equals("Email should be valid"));
     }
@@ -110,12 +106,11 @@ public class AuthControllerTest {
     @Test
     void save_withInvalidEmail5() throws Exception {
         RequestDto requestDto = new RequestDto("@mail.com", "password");
-        String requestJson = objectMapper.writeValueAsString(requestDto);
-        var result = mockMvc.perform(post("http://localhost:8765/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
+
+        var result = sendRegisterRequest(requestDto)
                 .andExpect(status().is4xxClientError())
                 .andReturn();
+
         assertThat(result.getResponse().getContentAsString()
                 .equals("Email should be valid"));
     }
@@ -123,12 +118,11 @@ public class AuthControllerTest {
     @Test
     void save_withBlankEmail() throws Exception {
         RequestDto requestDto = new RequestDto("", "password");
-        String requestJson = objectMapper.writeValueAsString(requestDto);
-        var result = mockMvc.perform(post("http://localhost:8765/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
+
+        var result = sendRegisterRequest(requestDto)
                 .andExpect(status().is4xxClientError())
                 .andReturn();
+
         assertThat(result.getResponse().getContentAsString()
                 .equals("Email should be valid"));
     }
@@ -136,33 +130,35 @@ public class AuthControllerTest {
     @Test
     void save_withBlankPassword() throws Exception {
         RequestDto requestDto = new RequestDto("test@mail.com", "");
-        String requestJson = objectMapper.writeValueAsString(requestDto);
-        var result = mockMvc.perform(post("http://localhost:8765/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
+
+        var result = sendRegisterRequest(requestDto)
                 .andExpect(status().is4xxClientError())
                 .andReturn();
+
         assertThat(result.getResponse().getContentAsString()
                 .equals("Password shouldn't be empty"));
     }
 
     @Test
     void save_withExistingEmail() throws Exception {
-        RequestDto requestDto1 = new RequestDto("test@mail.com", "password");
-        RequestDto requestDto2 = new RequestDto("test@mail.com", "password");
-        String requestJson1 = objectMapper.writeValueAsString(requestDto1);
-        String requestJson2 = objectMapper.writeValueAsString(requestDto2);
-        mockMvc.perform(post("http://localhost:8765/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson1))
+        RequestDto requestDto = new RequestDto("test@mail.com", "password");
+
+        sendRegisterRequest(requestDto)
                 .andExpect(status().is2xxSuccessful());
-        var result = mockMvc.perform(post("http://localhost:8765/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson2))
+
+        var result = sendRegisterRequest(requestDto)
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
+
         assertThat(result.getResponse().getContentAsString()
                 .equals("This email has already registered"));
+    }
+
+    ResultActions sendRegisterRequest(RequestDto requestDto) throws Exception {
+        String requestJson = objectMapper.writeValueAsString(requestDto);
+        return mockMvc.perform(post("http://localhost:8765/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson));
     }
 
 }
