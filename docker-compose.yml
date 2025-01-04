@@ -1,7 +1,7 @@
 version: '3.8'
 
 networks:
-  kafka-net:
+  consul-net:
     driver: bridge
 
 volumes:
@@ -18,7 +18,7 @@ services:
     ports:
       - "2181:2181"
     networks:
-      - kafka-net
+      - consul-net
 
   kafka:
     image: wurstmeister/kafka
@@ -37,7 +37,7 @@ services:
       - consul
       - zookeeper
     networks:
-      - kafka-net
+      - consul-net
 
   kafdrop:
     image: obsidiandynamics/kafdrop
@@ -51,7 +51,7 @@ services:
       - consul
       - "kafka"
     networks:
-      - kafka-net
+      - consul-net
 
   email-service:
     container_name: email-service
@@ -63,7 +63,7 @@ services:
     ports:
       - 45292:45292
     networks:
-      - kafka-net
+      - consul-net
       
   security-service:
     container_name: security-service
@@ -75,7 +75,7 @@ services:
       - consul
       - usersDB
     networks:
-      - kafka-net
+      - consul-net
 
   usersDB:
     image: postgres:alpine
@@ -91,7 +91,7 @@ services:
     volumes:
       - ./usersDB:/data
     networks:
-      - kafka-net
+      - consul-net
       
   profile-service:
     container_name: profile-service
@@ -102,7 +102,7 @@ services:
     ports:
       - 45291:45291
     networks:
-      - kafka-net
+      - consul-net
 
   profileDb:
     image: postgres:alpine
@@ -119,7 +119,7 @@ services:
     volumes:
       - ./profileDb:/data
     networks:
-      - kafka-net
+      - consul-net
 
   consul:
     container_name: consul
@@ -128,5 +128,5 @@ services:
     ports:
       - 8500:8500
     networks:
-      - kafka-net
+      - consul-net
 
