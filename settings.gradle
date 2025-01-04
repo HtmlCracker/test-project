@@ -2,5 +2,5 @@ rootProject.name = 'test-project'
 include 'gateway'
 include 'profile-service'
 include 'email-service'
-
+include 'security-service'
 
