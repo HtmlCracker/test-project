@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: security-service
+  config:
+    import: application.env[.properties]
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://usersDB:5432/usersDB
+    username: ${USERNAME}
+    password: ${PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+  cloud:
+    consul:
+      port: 8500
+      host: http://consul
+      discovery:
+        health-check-url: http://security-service:8765/actuator/health
+server:
+  port: 8765
+
+jwt_secret: ${JWT_SECRET}

@@ -64,7 +64,35 @@ services:
       - 45292:45292
     networks:
       - kafka-net
+      
+  security-service:
+    container_name: security-service
+    env_file: ./security-service/src/main/resources/application.env
+    build: ./security-service
+    ports:
+      - '8765:8765'
+    depends_on:
+      - consul
+      - usersDB
+    networks:
+      - kafka-net
 
+  usersDB:
+    image: postgres:alpine
+    container_name: usersDB
+    hostname: usersDB
+    ports:
+      - '5430:5432'
+    environment:
+      POSTGRES_DB: usersDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - ./usersDB:/data
+    networks:
+      - kafka-net
+      
   profile-service:
     container_name: profile-service
     build: profile-service
@@ -101,3 +129,4 @@ services:
       - 8500:8500
     networks:
       - kafka-net
+
