@@ -82,7 +82,7 @@ services:
     container_name: usersDB
     hostname: usersDB
     ports:
-      - '5430:5432'
+      - '5430:5430'
     environment:
       POSTGRES_DB: usersDB
       POSTGRES_USER: postgres
@@ -96,6 +96,7 @@ services:
   profile-service:
     container_name: profile-service
     build: profile-service
+    env_file: ./profile-service/src/main/resources/application.env
     depends_on:
       - profileDb
       - consul
