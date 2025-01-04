@@ -1,6 +1,70 @@
-version: '3'
+version: '3.8'
+
+networks:
+  kafka-net:
+    driver: bridge
+
+volumes:
+  storage-files: { }
 
 services:
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    restart: "no"
+    depends_on:
+      - consul
+    ports:
+      - "2181:2181"
+    networks:
+      - kafka-net
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    restart: "no"
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_CREATE_TOPICS: "email-service-v1-group:1:1"
+    depends_on:
+      - consul
+      - zookeeper
+    networks:
+      - kafka-net
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    container_name: kafdrop
+    restart: "no"
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:29092"
+    depends_on:
+      - consul
+      - "kafka"
+    networks:
+      - kafka-net
+
+  email-service:
+    container_name: email-service
+    env_file: /email-service/src/main/resources/application.env
+    build: email-service
+    depends_on:
+      - "kafka"
+      - consul
+    ports:
+      - 45292:45292
+    networks:
+      - kafka-net
+      
   security-service:
     container_name: security-service
     env_file: ./security-service/src/main/resources/application.env
@@ -10,12 +74,8 @@ services:
     depends_on:
       - consul
       - usersDB
-
-  consul:
-    image: consul:1.1.0
-    hostname: consul
-    ports:
-      - '8500:8500'
+    networks:
+      - kafka-net
 
   usersDB:
     image: postgres:alpine
@@ -30,3 +90,43 @@ services:
       PGDATA: /data/postgres
     volumes:
       - ./usersDB:/data
+    networks:
+      - kafka-net
+      
+  profile-service:
+    container_name: profile-service
+    build: profile-service
+    depends_on:
+      - profileDb
+      - consul
+    ports:
+      - 45291:45291
+    networks:
+      - kafka-net
+
+  profileDb:
+    image: postgres:alpine
+    restart: unless-stopped
+    hostname: profileDb
+    container_name: profileDb
+    ports:
+      - 5431:5431
+    environment:
+      POSTGRES_DB: profileDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - ./profileDb:/data
+    networks:
+      - kafka-net
+
+  consul:
+    container_name: consul
+    image: consul:1.1.0
+    hostname: consul
+    ports:
+      - 8500:8500
+    networks:
+      - kafka-net
+
