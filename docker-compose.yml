@@ -3,6 +3,8 @@ version: '3.8'
 networks:
   kafka-net:
     driver: bridge
+  consul-net:
+    driver: bridge
 
 volumes:
   storage-files: { }
@@ -19,6 +21,7 @@ services:
       - "2181:2181"
     networks:
       - kafka-net
+      - consul-net
 
   kafka:
     image: wurstmeister/kafka
@@ -38,6 +41,7 @@ services:
       - zookeeper
     networks:
       - kafka-net
+      - consul-net
 
   kafdrop:
     image: obsidiandynamics/kafdrop
@@ -52,6 +56,7 @@ services:
       - "kafka"
     networks:
       - kafka-net
+      - consul-net
 
   email-service:
     container_name: email-service
@@ -64,37 +69,7 @@ services:
       - 45292:45292
     networks:
       - kafka-net
-
-  storage-service:
-    container_name: storage-service
-    env_file: storage-service/src/main/resources/application.env
-    build: storage-service
-    depends_on:
-      - storageDb
-      - consul
-    ports:
-      - 45290:45290
-    volumes:
-      - ./storage-files:/app/storage-files
-    networks:
-      - kafka-net
-
-  storageDb:
-    image: postgres:alpine
-    restart: unless-stopped
-    hostname: storageDb
-    container_name: storageDb
-    ports:
-      - 5432:5432
-    environment:
-      POSTGRES_DB: storageDb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      PGDATA: /data/postgres
-    volumes:
-      - ./storageDb:/data
-    networks:
-      - kafka-net
+      - consul-net
 
   profile-service:
     container_name: profile-service
@@ -105,7 +80,7 @@ services:
     ports:
       - 45291:45291
     networks:
-      - kafka-net
+      - consul-net
 
   profileDb:
     image: postgres:alpine
@@ -122,7 +97,7 @@ services:
     volumes:
       - ./profileDb:/data
     networks:
-      - kafka-net
+      - consul-net
 
   consul:
     container_name: consul
@@ -132,3 +107,4 @@ services:
       - 8500:8500
     networks:
       - kafka-net
+      - consul-net
