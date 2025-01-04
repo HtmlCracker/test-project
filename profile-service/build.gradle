@@ -1,0 +1,67 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('springCloudVersion', "2023.0.3")
+}
+
+// Consul
+dependencies {
+    implementation 'org.springframework.cloud:spring-cloud-starter-consul-discovery'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+}
+
+// Postgresql
+dependencies {
+    implementation group: "org.postgresql", name: "postgresql", version: "42.2.19"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+}
+
+// Lombok
+dependencies {
+    compileOnly "org.projectlombok:lombok:1.18.30"
+    testCompileOnly "org.projectlombok:lombok:1.18.30"
+    annotationProcessor "org.projectlombok:lombok:1.18.30"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.30"
+}
+
+// Spring boot
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// Spring Data Jpa
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+}
+
+// Feign
+dependencies {
+    implementation 'org.springframework.cloud:spring-cloud-dependencies:Hoxton.RELEASE'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:2.2.5.RELEASE'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
