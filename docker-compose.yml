@@ -1,10 +1,9 @@
 version: '3.8'
 
 networks:
-  kafka-net:
-    driver: bridge
   consul-net:
     driver: bridge
+
 
 volumes:
   storage-files: { }
@@ -20,7 +19,6 @@ services:
     ports:
       - "2181:2181"
     networks:
-      - kafka-net
       - consul-net
 
   kafka:
@@ -40,7 +38,6 @@ services:
       - consul
       - zookeeper
     networks:
-      - kafka-net
       - consul-net
 
   kafdrop:
@@ -55,7 +52,6 @@ services:
       - consul
       - "kafka"
     networks:
-      - kafka-net
       - consul-net
 
   email-service:
@@ -68,9 +64,7 @@ services:
     ports:
       - 45292:45292
     networks:
-      - kafka-net
       - consul-net
-
   profile-service:
     container_name: profile-service
     build: profile-service
@@ -106,5 +100,4 @@ services:
     ports:
       - 8500:8500
     networks:
-      - kafka-net
       - consul-net
