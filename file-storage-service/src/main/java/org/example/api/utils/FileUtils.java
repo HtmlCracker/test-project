@@ -35,7 +35,7 @@ public class FileUtils {
     }
 
     public void addFileToPath(String path, String fileName, MultipartFile file) {
-        String pathToSave = rootPath + path + fileName;
+        String pathToSave = rootPath + "/" + path + "/" + fileName;
         File destination = new File(pathToSave);
 
         try (FileOutputStream outputStream = new FileOutputStream(destination)) {

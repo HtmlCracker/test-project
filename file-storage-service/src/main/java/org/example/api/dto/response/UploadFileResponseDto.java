@@ -10,7 +10,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StorageDto {
+public class UploadFileResponseDto {
     UUID id;
-    Long usedStorageByte;
+    String fileName;
+    Long fileSize;
 }

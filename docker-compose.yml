@@ -1,11 +1,12 @@
 version: '3.8'
 
 networks:
-  kafka-net:
+  consul-net:
     driver: bridge
 
 volumes:
   storage-files: { }
+  pgadmin-data: { }
 
 services:
 
@@ -18,7 +19,7 @@ services:
     ports:
       - "2181:2181"
     networks:
-      - kafka-net
+      - consul-net
 
   kafka:
     image: wurstmeister/kafka
@@ -37,7 +38,7 @@ services:
       - consul
       - zookeeper
     networks:
-      - kafka-net
+      - consul-net
 
   kafdrop:
     image: obsidiandynamics/kafdrop
@@ -51,7 +52,7 @@ services:
       - consul
       - "kafka"
     networks:
-      - kafka-net
+      - consul-net
 
   email-service:
     container_name: email-service
@@ -63,21 +64,49 @@ services:
     ports:
       - 45292:45292
     networks:
-      - kafka-net
+      - consul-net
 
-  storage-service:
-    container_name: storage-service
-    env_file: storage-service/src/main/resources/application.env
-    build: storage-service
+  security-service:
+    container_name: security-service
+    env_file: ./security-service/src/main/resources/application.env
+    build: ./security-service
+    ports:
+      - '8765:8765'
+    depends_on:
+      - consul
+      - usersDB
+    networks:
+      - consul-net
+
+  usersDB:
+    image: postgres:alpine
+    container_name: usersDB
+    hostname: usersDB
+    ports:
+      - '5430:5430'
+    environment:
+      POSTGRES_DB: usersDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - ./usersDB:/data
+    networks:
+      - consul-net
+
+  file-storage-service:
+    container_name: file-storage-service
+    env_file: file-storage-service/src/main/resources/application.env
+    build: file-storage-service
     depends_on:
       - storageDb
       - consul
     ports:
-      - 45290:45290
+      - 45295:45295
     volumes:
       - ./storage-files:/app/storage-files
     networks:
-      - kafka-net
+      - consul-net
 
   storageDb:
     image: postgres:alpine
@@ -85,7 +114,7 @@ services:
     hostname: storageDb
     container_name: storageDb
     ports:
-      - 5432:5432
+      - 5437:5437
     environment:
       POSTGRES_DB: storageDb
       POSTGRES_USER: postgres
@@ -94,7 +123,7 @@ services:
     volumes:
       - ./storageDb:/data
     networks:
-      - kafka-net
+      - consul-net
 
   profile-service:
     container_name: profile-service
@@ -105,7 +134,7 @@ services:
     ports:
       - 45291:45291
     networks:
-      - kafka-net
+      - consul-net
 
   profileDb:
     image: postgres:alpine
@@ -122,7 +151,21 @@ services:
     volumes:
       - ./profileDb:/data
     networks:
-      - kafka-net
+      - consul-net
+
+  pgadmin4:
+    container_name: pgadmin4
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@a48zomro.ml
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - consul-net
 
   consul:
     container_name: consul
@@ -131,4 +174,4 @@ services:
     ports:
       - 8500:8500
     networks:
-      - kafka-net
+      - consul-net

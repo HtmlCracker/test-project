@@ -9,7 +9,7 @@ public class StorageDtoFactory {
     public StorageDto makeStorageDto(StorageEntity entity) {
         return StorageDto.builder()
                 .id(entity.getId())
-                .usedStorageMB(entity.getUsedStorageMB())
+                .usedStorageByte(entity.getUsedStorageByte())
                 .build();
     }
 }

@@ -24,7 +24,7 @@ public class CustomExceptionHandler {
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Object> handleNotFoundException(BadRequestException ex) {
+    public ResponseEntity<Object> handleNotFoundException(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ErrorDto.builder()
                         .error("Not Found")

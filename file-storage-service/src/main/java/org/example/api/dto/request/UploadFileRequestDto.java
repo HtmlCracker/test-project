@@ -1,7 +1,8 @@
-package org.example.api.dto.response;
+package org.example.api.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StorageDto {
-    UUID id;
-    Long usedStorageByte;
+public class UploadFileRequestDto {
+    UUID ownerId;
+    MultipartFile file;
 }
