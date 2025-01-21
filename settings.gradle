@@ -1,8 +1,5 @@
 rootProject.name = 'test-project'
-include 'test-service'
-include 'test-service-second'
 include 'gateway'
 include 'profile-service'
 include 'email-service'
-include 'email-sender-service'
 include 'security-service'
