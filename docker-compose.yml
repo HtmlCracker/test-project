@@ -65,6 +65,36 @@ services:
       - 45292:45292
     networks:
       - consul-net
+
+  security-service:
+    container_name: security-service
+    env_file: ./security-service/src/main/resources/application.env
+    build: ./security-service
+    ports:
+      - '8765:8765'
+    depends_on:
+      - "kafka"
+      - consul
+      - usersDB
+    networks:
+      - consul-net
+
+  usersDB:
+    image: postgres:alpine
+    container_name: usersDB
+    hostname: usersDB
+    ports:
+      - '5430:5430'
+    environment:
+      POSTGRES_DB: usersDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - ./usersDB:/data
+    networks:
+      - consul-net
+
   profile-service:
     container_name: profile-service
     build: profile-service
