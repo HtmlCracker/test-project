@@ -19,7 +19,7 @@ public class ProducerService {
     String TOPIK = "email-service-v1-group";
     KafkaTemplate<String, String> kafkaTemplate;
 
-    public void sendMessageOrThrowException(ArrayList<SendMessageRequestDto> dtos) {
+    public void sendMessagesOrThrowException(ArrayList<SendMessageRequestDto> dtos) {
         String message = serializeIntoJsonOrThrowException(dtos);
         kafkaTemplate.send(TOPIK, message);
     }
