@@ -1,6 +1,7 @@
 package org.example.api.services;
 
 
+import org.example.api.dto.response.GetFileResponseDto;
 import org.example.api.dto.response.StorageDto;
 import org.example.api.dto.response.UploadFileResponseDto;
 import org.example.api.entities.FileInfoEntity;
@@ -19,6 +20,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,14 +35,13 @@ public class StorageService {
     StorageDtoFactory storageDtoFactory;
     UploadFileResponseDtoFactory uploadFileResponseDtoFactory;
 
-    public StorageDto createStorage(String profileId) {
-        UUID profileIdUuid = UUID.fromString(profileId);
+    public StorageDto createStorage(UUID profileId) {
 
-        storageRepository.findByOwnerId(profileIdUuid).ifPresent((storage -> {
+        storageRepository.findByOwnerId(profileId).ifPresent((storage -> {
                     throw new BadRequestException(String.format("Storage for profile id %s already exists", profileId));
                 }));
 
-        StorageEntity savedEntity = saveStorageEntity(storageEntityBuilder(profileIdUuid));
+        StorageEntity savedEntity = saveStorageEntity(storageEntityBuilder(profileId));
 
         try {
             fileUtils.createDirectory(savedEntity.getId().toString());
@@ -62,14 +63,12 @@ public class StorageService {
     }
 
 
-    public UploadFileResponseDto uploadFile(String ownerId, MultipartFile file) {
-        UUID ownerIdUuid = UUID.fromString(ownerId);
-
+    public UploadFileResponseDto uploadFile(UUID ownerId, MultipartFile file) {
         if (file.isEmpty())
             throw new BadRequestException("File can't be empty.");
 
-        StorageEntity storage = storageRepository.findByOwnerId(ownerIdUuid)
-                .orElseThrow(() -> new NotFoundException(String.format("Storage for profile id \"%s\" does not exist", ownerIdUuid)));
+        StorageEntity storage = storageRepository.findByOwnerId(ownerId)
+                .orElseThrow(() -> new NotFoundException(String.format("Storage for profile id \"%s\" does not exist", ownerId)));
 
         FileInfoEntity fileInfoEntity = makeFileInfoEntity(storage, file);
         FileInfoEntity savedFileInfoEntity = saveFileInfoEntity(fileInfoEntity);
@@ -113,6 +112,23 @@ public class StorageService {
         System.out.println(path);
         String fileName = fileInfoEntity.getId().toString();
 
-        fileUtils.addFileToPath(path, fileName, file);
+        fileUtils.saveFileToPath(path, fileName, file);
+    }
+
+
+    public GetFileResponseDto getFile(UUID fileId) {
+        FileInfoEntity fileInfoEntity = fileInfoRepository.findById(fileId)
+                .orElseThrow(() -> new NotFoundException(String.format("File with id \"%s\" does not exist", fileId)));
+
+        String path = fileInfoEntity.getStorage().getId().toString();
+        String fileName = fileInfoEntity.getId().toString();
+
+        byte[] byteData = fileUtils.getFileByPath(path, fileName);
+
+        return GetFileResponseDto.builder()
+                .byteData(byteData)
+                .fileName(fileInfoEntity.getOriginalName())
+                .fileSize(fileInfoEntity.getFileSizeByte())
+                .build();
     }
 }
