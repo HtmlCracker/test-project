@@ -21,23 +21,23 @@ import java.util.UUID;
 public class StorageController {
     StorageService storageService;
 
-    public static final String CREATE_STORAGE = "api/private/storage/create/{profileId}";
     public static final String UPLOAD_FILE = "api/private/storage/upload";
     public static final String GET_FILE = "api/private/storage/get/{fileId}";
+    public static final String DEL_FILE = "api/private/storage/delete/{fileId}";
 
-    @PostMapping(CREATE_STORAGE)
-    public StorageDto createStorage(@PathVariable UUID profileId) {
-        return storageService.createStorage(profileId);
-    }
+    /*@PostMapping(UPLOAD_FILE)
+    public UploadFileResponseDto uploadFile(@RequestParam(value = "file") MultipartFile file,
+                                            @RequestParam(value = "isCompressed") boolean isCompressed) {
+        return storageService.uploadFile(file, isCompressed);
+    }*/
 
-    @PostMapping(UPLOAD_FILE)
-    public UploadFileResponseDto uploadFile(@RequestParam("ownerId") UUID ownerId,
-                                            @RequestParam(value = "file") MultipartFile file) {
-        return storageService.uploadFile(ownerId, file);
-    }
+    //@GetMapping(GET_FILE)
+    //public GetFileResponseDto getFile(@PathVariable UUID fileId) {
+    //    return storageService.getFile(fileId);
+    //}
 
-    @GetMapping(GET_FILE)
-    public GetFileResponseDto getFile(@PathVariable UUID fileId) {
-        return storageService.getFile(fileId);
+    // TODO: Сделать
+    @DeleteMapping(DEL_FILE)
+    public void delFile(@PathVariable UUID fileId) {
     }
 }

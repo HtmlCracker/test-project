@@ -14,6 +14,15 @@ import java.util.Map;
 @Slf4j
 @ControllerAdvice
 public class CustomExceptionHandler {
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorDto.builder()
+                        .error("IllegalArgumentException")
+                        .errorDescription(ex.getMessage())
+                        .build());
+    }
+
     @ExceptionHandler(IOException.class)
     public ResponseEntity<Object> handleIOException(IOException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)

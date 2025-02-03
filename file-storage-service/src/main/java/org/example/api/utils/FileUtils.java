@@ -4,13 +4,12 @@ import org.example.api.exceptions.BadRequestException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
+import java.nio.file.StandardOpenOption;
 
 
 public class FileUtils {
@@ -24,8 +23,8 @@ public class FileUtils {
         return new FileUtils(rootPath);
     }
 
-    public void createDirectory(String directoryName) {
-        Path newDirectoryPath = Paths.get(rootPath, directoryName);
+    public void createDirectory(Path path, String directoryName) {
+        Path newDirectoryPath = Paths.get(path.toString(), directoryName);
         File newDirectory = newDirectoryPath.toFile();
 
         if (newDirectory.exists())
@@ -38,8 +37,18 @@ public class FileUtils {
         }
     }
 
-    public void saveFileToPath(String path, String fileName, MultipartFile file) {
-        Path pathToSave = Paths.get(rootPath, path, fileName);
+    public void saveFileInByteToPath(Path path, String fileName, byte[] fileInByte) {
+        Path pathToSave = Paths.get(path.toString(), fileName);
+
+        try {
+            Files.write(pathToSave, fileInByte, StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            throw new org.example.api.exceptions.IOException("The specified path does not exist or is inaccessible");
+        }
+    }
+
+    public void saveMultipartFileToPath(Path path, String fileName, MultipartFile file) {
+        Path pathToSave = Paths.get(path.toString(), fileName);
         File destination = pathToSave.toFile();
 
         try (FileOutputStream outputStream = new FileOutputStream(destination)) {
@@ -49,12 +58,11 @@ public class FileUtils {
         }
     }
 
-    public byte[] getFileByPath(String path, String fileName) {
-        Path fullPath = Paths.get(rootPath, path, fileName);
+    public byte[] getFileByPath(Path path) {
         byte[] byteData;
 
         try {
-            byteData = Files.readAllBytes(fullPath);
+            byteData = Files.readAllBytes(path);
         } catch (IOException e) {
             throw new org.example.api.exceptions.IOException("File is corrupted.");
         }
