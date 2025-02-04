@@ -1,5 +1,27 @@
 spring:
   application:
-    name: gateway-service
+    name:
+      gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: security-service
+          uri: lb://security-service
+          predicates:
+            - Path=/auth/**
+        - id: publication-service
+          uri: lb://profile-service
+          predicates:
+            - Path=/api/private/**
+    consul:
+      host: http://consul
+      port: 8500
 server:
-  port: 0
+  port: 8080
+
+validateUrl:
+  http://security-service:8765/auth/validate?token=

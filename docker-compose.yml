@@ -52,6 +52,16 @@ services:
     networks:
       - consul-net
 
+  gateway:
+    container_name: gateway
+    build: ./gateway
+    ports:
+      - '8080:8080'
+    depends_on:
+      - consul
+    networks:
+      - consul-net
+
   email-service:
     container_name: email-service
     env_file: /email-service/src/main/resources/application.env
