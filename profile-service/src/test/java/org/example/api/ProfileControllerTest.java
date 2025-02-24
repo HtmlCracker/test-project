@@ -3,6 +3,8 @@ package org.example.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.api.controllers.ProfileController;
 import org.example.api.dto.request.ProfileRegistrationRequestDto;
+import org.example.api.dto.response.ProfileResponseDto;
+import org.example.api.entities.ProfileEntity;
 import org.example.api.factories.ProfileDtoFactory;
 import org.example.api.services.ProfileService;
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,7 @@ public class ProfileControllerTest {
 
     @MockBean
     private ProfileDtoFactory profileDtoFactory;
+
 
     @Test
     void registerProfile_WithNullEmail_ShouldThrowBadRequest() throws Exception {
@@ -120,6 +123,7 @@ public class ProfileControllerTest {
 
         MvcResult result = mockMvc.perform(request)
                 .andExpect(status().isOk()).andReturn();
+
 
     }
 
