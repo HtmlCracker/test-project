@@ -15,8 +15,8 @@ import java.util.Map;
 @ControllerAdvice
 public class CustomExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Object> handleNotFoundException(BadRequestException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleNotFoundException(NotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ErrorDto.builder()
                         .error("Not Found")
                         .errorDescription(ex.getMessage())
