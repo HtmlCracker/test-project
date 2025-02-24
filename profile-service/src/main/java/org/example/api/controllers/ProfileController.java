@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.api.dto.request.ProfileRegistrationRequestDto;
 import org.example.api.dto.request.ProfileUpdateRequestDto;
+import org.example.api.dto.response.DelProfileResponseDto;
 import org.example.api.dto.response.ProfileResponseDto;
 import org.example.api.entities.ProfileEntity;
 import org.example.api.factories.ProfileDtoFactory;
@@ -27,6 +28,7 @@ public class ProfileController {
     public static final String REGISTRATION_PROFILE = "api/public/accounts/registration";
     public static final String UPDATE_PROFILE = "api/private/accounts/update/{profileId}";
     public static final String GET_PROFILE = "api/private/accounts/get/{profileId}";
+    public static final String DEL_PROFILE = "api/private/accounts/del/{profileId}";
 
     @PostMapping(REGISTRATION_PROFILE)
     public ProfileResponseDto registrationProfile(@Valid @RequestBody ProfileRegistrationRequestDto requestDto) {
@@ -45,5 +47,10 @@ public class ProfileController {
     public ProfileResponseDto getProfileDto(@PathVariable UUID profileId) {
         ProfileEntity profile = profileService.getProfileByIdOrThrowException(profileId);
         return profileDtoFactory.makeProfileDto(profile);
+    }
+
+    @DeleteMapping(DEL_PROFILE)
+    public DelProfileResponseDto delProfile(@PathVariable UUID profileId) {
+        return profileService.delProfile(profileId);
     }
 }

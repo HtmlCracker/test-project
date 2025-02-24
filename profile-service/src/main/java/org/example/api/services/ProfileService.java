@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.api.dto.request.ProfileRegistrationRequestDto;
 import org.example.api.dto.request.ProfileUpdateRequestDto;
+import org.example.api.dto.response.DelProfileResponseDto;
 import org.example.api.entities.ProfileEntity;
 import org.example.api.exceptions.BadRequestException;
 import org.example.api.exceptions.NotFoundException;
@@ -76,5 +77,15 @@ public class ProfileService {
         return profileEntity;
     }
 
+
+    public DelProfileResponseDto delProfile(UUID profileId) {
+        ProfileEntity profile = getProfileByIdOrThrowException(profileId);
+
+        profileRepository.delete(profile);
+
+        return DelProfileResponseDto.builder()
+                .status("The profile has been deleted.")
+                .build();
+    }
 
 }
