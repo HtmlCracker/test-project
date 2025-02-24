@@ -1,6 +1,6 @@
 package com.example.securityservice.service;
 
-import com.example.securityservice.dto.RequestDto;
+import com.example.securityservice.dto.UserRequestDto;
 import com.example.securityservice.entity.User;
 import com.example.securityservice.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
@@ -35,12 +34,12 @@ public class UserService {
     }
 
     @Transactional
-    public String save(RequestDto requestDto){
-        if (userRepository.findByEmail(requestDto.getEmail()).isPresent())
+    public String save(UserRequestDto userRequestDto){
+        if (userRepository.findByEmail(userRequestDto.getEmail()).isPresent())
             return "This email has already registered";
         User user = new User(
-                requestDto.getEmail(),
-                passwordEncoder.encode(requestDto.getPassword()),
+                userRequestDto.getEmail(),
+                passwordEncoder.encode(userRequestDto.getPassword()),
                 LocalDateTime.now(),
                 false);
         //TODO отправка email с кодом
@@ -49,7 +48,7 @@ public class UserService {
     }
 
     @Transactional
-    public String update(String email, RequestDto userUpd) {
+    public String update(String email, UserRequestDto userUpd) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         user.setPassword(passwordEncoder.encode(userUpd.getPassword()));

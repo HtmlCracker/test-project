@@ -1,7 +1,6 @@
 package com.example.securityservice.controller;
 
-import com.example.securityservice.dto.RequestDto;
-import com.example.securityservice.entity.RefreshToken;
+import com.example.securityservice.dto.UserRequestDto;
 import com.example.securityservice.entity.User;
 import com.example.securityservice.service.JwtService;
 import com.example.securityservice.service.RefreshTokenService;
@@ -32,14 +31,14 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String register(@Valid @RequestBody RequestDto requestDto){
-        return userService.save(requestDto);
+    public String register(@Valid @RequestBody UserRequestDto userRequestDto){
+        return userService.save(userRequestDto);
     }
 
     //TODO /activate
 
     @PatchMapping("/update")
-    public String update(@Valid @RequestBody RequestDto userUpd, @RequestHeader("Authorization") String authHeader){
+    public String update(@Valid @RequestBody UserRequestDto userUpd, @RequestHeader("Authorization") String authHeader){
         return userService.update(jwtService.extractEmail(authHeader.substring(7)), userUpd);
     }
 
@@ -49,14 +48,14 @@ public class AuthController {
     }
 
     @PostMapping("/token")
-    public String getToken(@Valid @RequestBody RequestDto requestDto){
-        User user = userService.findByEmail(requestDto.getEmail()).orElseThrow(EntityNotFoundException::new);
+    public String getToken(@Valid @RequestBody UserRequestDto userRequestDto){
+        User user = userService.findByEmail(userRequestDto.getEmail()).orElseThrow(EntityNotFoundException::new);
         if (!user.isEnabled())
             return "Your account is not activated";
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                requestDto.getEmail(),
-                requestDto.getPassword()));
+                userRequestDto.getEmail(),
+                userRequestDto.getPassword()));
         if (authentication.isAuthenticated())
             return "Your JWT token: " + jwtService.generateToken(user) + "\n" +
                     "Your Refresh token: " + refreshTokenService.createRefreshToken(user);
