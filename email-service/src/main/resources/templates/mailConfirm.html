@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mail confirm</title>
+</head>
+<body>
+<form th:action="@{http://localhost:45292/api/public/main/verify}" method="post">  <!-- Убрали token из th:action -->
+    <input type="hidden" id="token" name="token" th:value="${token}" required>
+    <button type="submit">Submit</button>
+</form>
+</body>
+</html>

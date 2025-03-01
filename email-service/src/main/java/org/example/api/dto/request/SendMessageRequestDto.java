@@ -8,6 +8,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.util.HashMap;
 
 
 @Data
@@ -22,5 +23,6 @@ public class SendMessageRequestDto {
     @NotBlank
     String subject;
     @NotBlank
-    String text;
+    String htmlTemplateName;
+    HashMap<String, Object> variables;
 }

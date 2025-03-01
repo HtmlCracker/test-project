@@ -13,16 +13,18 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
+
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
 public class ConsumerService {
-    EmailSenderService emailSenderService;
+    EmailQueneService emailQueneService;
 
     @KafkaListener(topics = "email-service-v1-group", groupId = "group_id")
-    public void consumeMessage(String message) {
+    public void consumeMessage(String message) throws InterruptedException {
         ArrayList<SendMessageRequestDto> dtos = deserializeMessage(message);
-        emailSenderService.sendMessages(dtos);
+
+        emailQueneService.addMessagesToQueue(dtos);
     }
 
     private ArrayList<SendMessageRequestDto> deserializeMessage(String message) {

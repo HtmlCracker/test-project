@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.HashMap;
+
 
 @Data
 @Builder
@@ -18,6 +20,9 @@ public class SendMessageRequestDto {
     String toMail;
     @NotBlank
     String subject;
+    // "mailConfirm" for send mail verify message
     @NotBlank
-    String text;
+    String htmlTemplateName;
+    // "token": "some_token" for mailConfirm template
+    HashMap<String, Object> variables;
 }

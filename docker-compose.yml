@@ -69,8 +69,25 @@ services:
     depends_on:
       - "kafka"
       - consul
+      - emailDb
     ports:
       - 45292:45292
+    networks:
+      - consul-net
+
+  emailDb:
+    image: postgres:alpine
+    container_name: emailDb
+    hostname: emailDb
+    ports:
+      - '5437:5437'
+    environment:
+      POSTGRES_DB: emailDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - ./emailDb:/data
     networks:
       - consul-net
 
