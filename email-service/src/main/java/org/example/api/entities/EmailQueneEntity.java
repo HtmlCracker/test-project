@@ -31,6 +31,8 @@ public class EmailQueneEntity {
 
     HashMap<String, Object> variables;
 
+    int priority;
+
     @Builder.Default
     Instant addDate = Instant.now(Clock.system(ZoneId.of("Europe/Moscow")));
 }

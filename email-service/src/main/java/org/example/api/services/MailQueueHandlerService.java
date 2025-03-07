@@ -23,7 +23,7 @@ public class MailQueueHandlerService {
     EmailSenderService emailSenderService;
     ThreadPoolTaskExecutor asyncTaskExecutor;
 
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedDelay = 5000)
     public void checkQueueAndResumeConsumer() throws InterruptedException {
         int queueSize = asyncTaskExecutor.getThreadPoolExecutor().getQueue().size();
         int THRESHOLD = 300;
@@ -31,7 +31,7 @@ public class MailQueueHandlerService {
         int freeSize = THRESHOLD-queueSize;
 
         if (freeSize > 0) {
-            ArrayList<EmailQueneEntity> entities = emailQueneService.findTopNRecords(freeSize);
+            ArrayList<EmailQueneEntity> entities = emailQueneService.findTopNRecordsByPriority(freeSize);
             log.info("Selected {} entities for processing.", entities.size());
 
             for (EmailQueneEntity entity : entities) {

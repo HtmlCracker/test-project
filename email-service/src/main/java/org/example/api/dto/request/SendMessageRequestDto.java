@@ -23,6 +23,8 @@ public class SendMessageRequestDto {
     @NotBlank
     String subject;
     @NotBlank
+    int priority;
+    @NotBlank
     String htmlTemplateName;
     HashMap<String, Object> variables;
 }

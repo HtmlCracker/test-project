@@ -8,6 +8,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public interface EmailQueneRepository extends JpaRepository<EmailQueneEntity, UUID> {
-    @Query(value = "SELECT * FROM email_quene ORDER BY id LIMIT ?1", nativeQuery = true)
-    ArrayList<EmailQueneEntity> findTopNRecords(int limit);
+    @Query(value = "SELECT * FROM email_quene ORDER BY priority ASC LIMIT ?1", nativeQuery = true)
+    ArrayList<EmailQueneEntity> findTopNRecordsByPriority(int limit);
 }

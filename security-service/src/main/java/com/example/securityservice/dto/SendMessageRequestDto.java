@@ -15,14 +15,11 @@ import java.util.HashMap;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SendMessageRequestDto {
-    @Pattern(regexp = "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}", message = "Email should be valid")
-    @NotNull
     String toMail;
-    @NotBlank
     String subject;
     // "mailConfirm" for send mail verify message
-    @NotBlank
     String htmlTemplateName;
+    int priority;
     // "token": "some_token" for mailConfirm template
     HashMap<String, Object> variables;
 }

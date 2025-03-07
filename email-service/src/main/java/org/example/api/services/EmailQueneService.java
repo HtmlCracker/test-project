@@ -34,8 +34,8 @@ public class EmailQueneService {
                 .build();
     }
 
-    public ArrayList<EmailQueneEntity> findTopNRecords(int count) {
-        return emailQueneRepository.findTopNRecords(count);
+    public ArrayList<EmailQueneEntity> findTopNRecordsByPriority(int count) {
+        return emailQueneRepository.findTopNRecordsByPriority(count);
     }
 
     public void delete(EmailQueneEntity entity) {
