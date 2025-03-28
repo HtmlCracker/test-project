@@ -1,6 +1,5 @@
 package org.example.api.exceptions;
 
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,17 +19,16 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Controller
 public class CustomErrorController implements ErrorController {
-
     private static final String PATH = "/error";
 
     ErrorAttributes errorAttributes;
 
     @RequestMapping(CustomErrorController.PATH)
-    public ResponseEntity<ErrorDto> error (WebRequest webRequest) {
-
-        Map<String, Object> attributes = errorAttributes.getErrorAttributes (
+    public ResponseEntity<ErrorDto> error(WebRequest webRequest) {
+        Map<String, Object> attributes = errorAttributes.getErrorAttributes(
                 webRequest,
-                ErrorAttributeOptions.of(ErrorAttributeOptions.Include.EXCEPTION, ErrorAttributeOptions.Include.MESSAGE)
+                ErrorAttributeOptions.of(ErrorAttributeOptions.Include.EXCEPTION,
+                        ErrorAttributeOptions.Include.MESSAGE)
         );
 
         return ResponseEntity
@@ -41,7 +39,5 @@ public class CustomErrorController implements ErrorController {
                         .errorDescription((String) attributes.get("message"))
                         .build()
                 );
-
     }
-
 }

@@ -31,7 +31,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
-      KAFKA_CREATE_TOPICS: "email-service-v1-group:1:1"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
     depends_on:
       - consul
       - zookeeper
@@ -64,30 +64,15 @@ services:
 
   email-service:
     container_name: email-service
+    volumes:
+      - ./logs:/app/logs
     env_file: /email-service/src/main/resources/application.env
     build: email-service
     depends_on:
       - "kafka"
       - consul
-      - emailDb
     ports:
       - 45292:45292
-    networks:
-      - consul-net
-
-  emailDb:
-    image: postgres:alpine
-    container_name: emailDb
-    hostname: emailDb
-    ports:
-      - '5437:5437'
-    environment:
-      POSTGRES_DB: emailDb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      PGDATA: /data/postgres
-    volumes:
-      - ./emailDb:/data
     networks:
       - consul-net
 

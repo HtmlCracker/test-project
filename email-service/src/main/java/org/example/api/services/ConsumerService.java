@@ -6,32 +6,37 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.example.api.dto.request.SendMessageRequestDto;
+import lombok.extern.slf4j.Slf4j;
+import org.example.api.dto.request.DynamicEmailNotificationDto;
 import org.example.api.exceptions.BadRequestException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-
-
+@Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
 public class ConsumerService {
-    EmailQueneService emailQueneService;
+    EmailSenderService emailSenderService;
 
-    @KafkaListener(topics = "email-service-v1-group", groupId = "group_id")
-    public void consumeMessage(String message) throws InterruptedException {
-        ArrayList<SendMessageRequestDto> dtos = deserializeMessage(message);
+    @KafkaListener(topics = "account-verification-emails-v1-group", groupId = "group_1")
+    public void consumeAccountVerifyMessage(String message) throws Exception {
+        TypeReference<DynamicEmailNotificationDto> typeRef = new TypeReference<>() {};
+        DynamicEmailNotificationDto dto = deserializeMessage(message, typeRef);
 
-        emailQueneService.addMessagesToQueue(dtos);
+        emailSenderService.sendSimpleMessage(dto, "mailConfirm", "account verify");
     }
 
-    private ArrayList<SendMessageRequestDto> deserializeMessage(String message) {
+    @KafkaListener(topics = "password-change-emails-v1-group", groupId = "group_2")
+    public void consumeChangePasswordMessage(String message) throws Exception {
+        TypeReference<DynamicEmailNotificationDto> typeRef = new TypeReference<>() {};
+        DynamicEmailNotificationDto dto = deserializeMessage(message, typeRef);
+
+        emailSenderService.sendSimpleMessage(dto, "changePasswordMessage", "Change password");
+    }
+
+    private <T> T deserializeMessage(String message, TypeReference<T> typeRef) {
         ObjectMapper mapper = new ObjectMapper();
-
-        TypeReference<ArrayList<SendMessageRequestDto>> typeRef = new TypeReference<>() {};
-
         try {
             return mapper.readValue(message, typeRef);
         } catch (JsonProcessingException e) {

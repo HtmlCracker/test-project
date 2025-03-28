@@ -12,7 +12,6 @@ import java.util.concurrent.Executor;
 @Configuration
 @EnableAsync
 public class AsyncConfig implements AsyncConfigurer {
-
     @Override
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -21,6 +20,7 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setQueueCapacity(300);
         executor.setThreadNamePrefix("EmailSenderThread-");
         executor.initialize();
+
         return executor;
     }
 

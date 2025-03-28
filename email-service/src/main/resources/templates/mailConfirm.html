@@ -5,9 +5,20 @@
     <title>Mail confirm</title>
 </head>
 <body>
-<form th:action="@{http://localhost:45292/api/public/main/verify}" method="post">  <!-- Убрали token из th:action -->
+<h1 style="color: blue; font-size: 30px; text-align: center;">Подтврерждение аккаунта</h1>
+<form th:action="@{http://localhost:8765/auth/email/activate}" method="post">
     <input type="hidden" id="token" name="token" th:value="${token}" required>
-    <button type="submit">Submit</button>
+    <button style="
+                    margin:auto; display:block;
+                    appearance: none;
+                    border: 0;
+                    border-radius: 5px;
+                    background: #4676D7;
+                    color: #fff;
+                    padding: 8px 16px;
+                    font-size: 16px;
+                "
+            type="submit">Submit</button>
 </form>
 </body>
 </html>

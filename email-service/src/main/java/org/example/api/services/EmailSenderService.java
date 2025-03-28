@@ -1,26 +1,31 @@
 package org.example.api.services;
 
-import org.example.api.exceptions.NotFoundException;
-import org.springframework.core.io.Resource;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.example.api.entities.EmailQueneEntity;
+import lombok.extern.slf4j.Slf4j;
+import org.example.api.dto.request.DynamicEmailNotificationDto;
 import org.example.api.exceptions.BadRequestException;
+import org.example.api.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.exceptions.TemplateProcessingException;
 
+@Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
@@ -29,15 +34,20 @@ public class EmailSenderService {
     JavaMailSender mailSender;
     @Autowired
     TemplateEngine templateEngine;
-    @Autowired
-    EmailQueneService emailQueneService;
 
     @Value("${spring.mail.username}")
-    String EMAIL_USERNAME;
+    final String EMAIL_USERNAME;
 
     @Async
-    public void sendMessage(EmailQueneEntity entity) throws InterruptedException, MessagingException {
-        if (!isTemplateExists(entity.getHtmlTemplateName())) {
+    @Retryable(
+            retryFor = {Exception.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 3000)
+    )
+    public void sendSimpleMessage(DynamicEmailNotificationDto dto,
+                                  String htmlTemplateName,
+                                  String subject) throws MessagingException {
+        if (!isTemplateExists(htmlTemplateName)) {
             throw new NotFoundException("Template is not found.");
         }
 
@@ -45,8 +55,8 @@ public class EmailSenderService {
         String htmlContent;
 
         try {
-            context.setVariables(entity.getVariables());
-            htmlContent = templateEngine.process(entity.getHtmlTemplateName(), context);
+            context.setVariables(dto.getVariables());
+            htmlContent = templateEngine.process(htmlTemplateName, context);
         } catch (TemplateProcessingException e) {
             throw new BadRequestException("Error parsing template.");
         } catch (Exception e) {
@@ -56,19 +66,24 @@ public class EmailSenderService {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
-        helper.setTo(entity.getSendTo());
-        helper.setSubject(entity.getSubject());
+        helper.setTo(dto.getToMail());
+        helper.setSubject(subject);
         helper.setText(htmlContent, true);
         helper.setFrom(EMAIL_USERNAME);
 
         try {
             mailSender.send(mimeMessage);
         } catch (MailSendException e) {
-            Thread.sleep(3000);
-            return;
+            throw e;
         }
+    }
 
-        emailQueneService.delete(entity);
+    @Recover
+    public void recoverSendSimpleMessage(Exception e,
+                                         DynamicEmailNotificationDto dto,
+                                         String htmlTemplateName,
+                                         String subject) {
+        log.error("Can't send email: {}; variables: {}", dto.getToMail(), dto.getVariables().toString());
     }
 
     private boolean isTemplateExists(String templateName) {
