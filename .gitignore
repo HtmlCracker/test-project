@@ -33,3 +33,4 @@ pom.xml.versions
 .bak
 .swp
 Thumbs.db
+/file-storage-service/src/main/resources/application.env

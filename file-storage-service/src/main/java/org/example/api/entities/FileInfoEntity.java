@@ -38,6 +38,7 @@ public class FileInfoEntity {
     FileStates fileState;
 
     @Column(nullable = false)
+    @Builder.Default
     Boolean isCompressed = false;
 
     @Column(nullable = false)
