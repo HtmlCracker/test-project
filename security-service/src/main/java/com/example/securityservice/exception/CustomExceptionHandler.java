@@ -15,10 +15,9 @@ import java.util.HashMap;
 
 @RestControllerAdvice
 public class CustomExceptionHandler {
-
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Object> badRequestException(BadRequestException ex) {
-        ErrorResponse response = new ErrorResponse("Bad Request", LocalDateTime.now());
+        ErrorResponse response = new ErrorResponse("Bad Request" + ex.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 

@@ -1,10 +1,9 @@
 package com.example.securityservice.controller;
 
+import com.example.securityservice.dto.ResetPasswordRequestDto;
 import com.example.securityservice.dto.UserRequestDto;
 import com.example.securityservice.entity.User;
-import com.example.securityservice.service.JwtService;
-import com.example.securityservice.service.RefreshTokenService;
-import com.example.securityservice.service.UserService;
+import com.example.securityservice.service.*;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -20,35 +19,55 @@ public class AuthController {
     private final UserService userService;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final EmailVerifyService emailVerifyService;
     private final AuthenticationManager authenticationManager;
 
+    private final ProducerService producerService;
+
     @Autowired
-    public AuthController(UserService userService, JwtService jwtService, RefreshTokenService refreshTokenService, AuthenticationManager authenticationManager) {
+    public AuthController(UserService userService, JwtService jwtService, RefreshTokenService refreshTokenService, AuthenticationManager authenticationManager, EmailVerifyService emailVerifyService, ProducerService producerService) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
+        this.emailVerifyService = emailVerifyService;
         this.authenticationManager = authenticationManager;
+        this.producerService = producerService;
+    }
+
+    @PostMapping("/forgot-password/{email}")
+    public void forgotPassword(@PathVariable String email) {
+        userService.forgotPassword(email);
+    }
+
+    @PostMapping("/reset-password/")
+    public String resetPassword(@Valid @RequestBody ResetPasswordRequestDto dto) {
+        System.out.println(dto.getFirstPassword());
+        return userService.resetPassword(dto);
     }
 
     @PostMapping("/register")
-    public String register(@Valid @RequestBody UserRequestDto userRequestDto){
+    public String register(@Valid @RequestBody UserRequestDto userRequestDto) {
         return userService.save(userRequestDto);
     }
 
-    //TODO /activate
+    @PostMapping("/email/activate")
+    public void activateEmail(@RequestParam("token") String token) {
+        emailVerifyService.activateEmail(token);
+    }
 
     @PatchMapping("/update")
-    public String update(@Valid @RequestBody UserRequestDto userUpd, @RequestHeader("Authorization") String authHeader){
+    public String update(@Valid @RequestBody UserRequestDto userUpd,
+                         @RequestHeader("Authorization") String authHeader) {
         return userService.update(jwtService.extractEmail(authHeader.substring(7)), userUpd);
     }
 
     @DeleteMapping("/delete")
-    public String delete(@RequestHeader("Authorization") String authHeader){
+    public String delete(@RequestHeader("Authorization") String authHeader) {
         return userService.delete(userService.findByEmail(jwtService.extractEmail(authHeader.substring(7))).orElseThrow(()->new EntityNotFoundException("User not found")));
     }
 
     @PostMapping("/token")
-    public String getToken(@Valid @RequestBody UserRequestDto userRequestDto){
+    public String getToken(@Valid @RequestBody UserRequestDto userRequestDto) {
         User user = userService.findByEmail(userRequestDto.getEmail()).orElseThrow(EntityNotFoundException::new);
         if (!user.isEnabled())
             return "Your account is not activated";
@@ -64,17 +83,18 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public String refresh(@RequestBody String token){
+    public String refresh(@RequestBody String token) {
         return refreshTokenService.refreshJwt(token);
     }
 
+    @SuppressWarnings("checkstyle:NeedBraces")
     @GetMapping("/validate")
-    public String isTokenValid(@RequestParam("token") String token){
+    public String isTokenValid(@RequestParam("token") String token) {
         try {
             User user = userService.findByEmail(jwtService.extractEmail(token)).orElseThrow(EntityNotFoundException::new);
-            if (jwtService.isTokenValid(token,user))
+            if (jwtService.isTokenValid(token, user))
                 return "Token is valid";
-        } catch (ExpiredJwtException e){}
+        } catch (ExpiredJwtException e) {}
         return "Invalid token";
     }
 }
