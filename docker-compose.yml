@@ -133,6 +133,35 @@ services:
     networks:
       - consul-net
 
+  file-storage-service:
+    container_name: file-storage-service
+    build: file-storage-service
+    env_file: ./file-storage-service/src/main/resources/application.env
+    depends_on:
+      - fileStorageDb
+      - consul
+    ports:
+      - 45295:45295
+    networks:
+      - consul-net
+
+  fileStorageDb:
+    image: postgres:alpine
+    restart: unless-stopped
+    hostname: fileStorageDb
+    container_name: fileStorageDb
+    ports:
+      - 5439:5439
+    environment:
+      POSTGRES_DB: fileStorageDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - ./fileStorageDb:/data
+    networks:
+      - consul-net
+
   consul:
     container_name: consul
     image: consul:1.1.0

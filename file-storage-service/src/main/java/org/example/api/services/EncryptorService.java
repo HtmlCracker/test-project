@@ -3,5 +3,5 @@ package org.example.api.services;
 import org.springframework.stereotype.Service;
 
 @Service
-public class StorageService {
+public class EncryptorService {
 }

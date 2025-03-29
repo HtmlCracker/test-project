@@ -3,12 +3,12 @@ server:
 
 spring:
   application:
-    name: storage-service
+    name: file-storage-service
 
   datasource:
-    url: jdbc:postgresql://storageDb:5432/storageDb
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://fileStorageDb:5432/fileStorageDb
+    username: ${USERNAME}
+    password: ${PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
