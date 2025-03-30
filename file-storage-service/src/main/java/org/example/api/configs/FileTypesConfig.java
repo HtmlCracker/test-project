@@ -4,14 +4,19 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-@Configuration
+@Component
 @ConfigurationProperties(prefix = "compression.file.types")
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Data
 public class FileTypesConfig {
-    List<String> text;
+    Set<String> textTypes = new HashSet<>(
+            Arrays.asList("txt", "log", "md", "csv", "tsv", "html", "htm", "xml", "json", "ini", "conf")
+    );
 }

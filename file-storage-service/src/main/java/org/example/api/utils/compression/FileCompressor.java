@@ -1,11 +1,18 @@
 package org.example.api.utils.compression;
 
+import jakarta.annotation.PostConstruct;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.example.api.configs.FileTypesConfig;
 import org.example.api.exceptions.IllegalArgumentException;
+import org.example.api.utils.compression.implementations.GenericCompressorStrategy;
 import org.example.api.utils.compression.implementations.TextCompressorStrategy;
 import org.example.api.utils.compression.interfaces.CompressionStrategy;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
@@ -13,24 +20,39 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 
+
+@Component
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FileCompressor {
-    final Map<String, CompressionStrategy> compressionStrategies = Map.of(
-            "txt", new TextCompressorStrategy()
-    );
+    final FileTypesConfig fileTypesConfig;
+    final GenericCompressorStrategy genericCompressorStrategy = new GenericCompressorStrategy();
+
+    final Map<String, CompressionStrategy> compressionStrategies = new HashMap<>();
+
+    @PostConstruct
+    public void initCompressionStrategies() {
+        fileTypesConfig.getTextTypes().forEach(type -> {
+            if(!compressionStrategies.containsKey(type)) {
+                compressionStrategies.put(type, new TextCompressorStrategy());
+            }
+        });
+    }
 
     public byte[] compressFile(MultipartFile file) {
         String fileType = getFileType(file);
         byte[] fileBytes;
         CompressionStrategy compressionStrategy = compressionStrategies.get(fileType);
 
+        fileBytes = getBytesByMultipartFile(file);
+
         if (compressionStrategy == null) {
-            return new byte[0];
+            return genericCompressorStrategy.compress(fileBytes);
         }
 
-        fileBytes = getBytesByMultipartFile(file);
         return compressionStrategy.compress(fileBytes);
     }
 

@@ -22,7 +22,6 @@ import java.util.Random;
 public class FolderService {
     @Value("${MAX_FILE_COUNT_IN_FOLDER:500}")
     int maxFileCount;
-
     final FileUtils fileUtils = FileUtils.of("/app/storage-files");
     final FolderRepository folderRepository;
 

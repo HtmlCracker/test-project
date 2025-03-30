@@ -1,10 +1,12 @@
 package org.example.api.utils.compression.implementations;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
 import org.example.api.exceptions.IOException;
 import org.example.api.utils.compression.interfaces.CompressionStrategy;
 
 import java.io.*;
+import java.util.Calendar;
 
 public class TextCompressorStrategy implements CompressionStrategy {
     @Override
@@ -36,4 +38,6 @@ public class TextCompressorStrategy implements CompressionStrategy {
             throw new IOException("Error compressing file: " + e.getMessage());
         }
     }
+
+
 }

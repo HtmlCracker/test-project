@@ -31,7 +31,7 @@ public class StorageService {
     FolderService folderService;
     UploadFileResponseDtoFactory uploadFileResponseDtoFactory;
 
-    FileCompressor fileCompressUtils = new FileCompressor();
+    FileCompressor fileCompressUtils;
     FileUtils fileUtils = FileUtils.of("/app/storage-files");
 
     /*public UploadFileResponseDto uploadFile(MultipartFile file, boolean isCompressed) {
