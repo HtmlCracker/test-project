@@ -1,24 +1,8 @@
 server:
   port: 45295
 
-compression:
-  file:
-    types:
-      - text:
-          - txt
-          - log
-          - md
-          - csv
-          - tsv
-          - html
-          - htm
-          - xml
-          - json
-          - ini
-          - conf
 
 spring:
-
   servlet:
     multipart:
       enabled: true
