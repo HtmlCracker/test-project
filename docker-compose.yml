@@ -144,6 +144,8 @@ services:
       - 45295:45295
     networks:
       - consul-net
+    volumes:
+      - storage-files:/files
 
   fileStorageDb:
     image: postgres:alpine
