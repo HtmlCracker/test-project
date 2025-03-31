@@ -29,9 +29,9 @@ public class RunAfterStartup {
 
     @EventListener(ApplicationReadyEvent.class)
     public void runAfterStartup() {
-        fileUtils.mkDir(temporaryStoragePath);
-        fileUtils.mkDir(compressedStoragePath);
-        fileUtils.mkDir(encryptedStoragePath);
-        fileUtils.mkDir(permanentStoragePath);
+        fileUtils.createDirectoryIfNotExists(temporaryStoragePath);
+        fileUtils.createDirectoryIfNotExists(compressedStoragePath);
+        fileUtils.createDirectoryIfNotExists(encryptedStoragePath);
+        fileUtils.createDirectoryIfNotExists(permanentStoragePath);
     }
 }
