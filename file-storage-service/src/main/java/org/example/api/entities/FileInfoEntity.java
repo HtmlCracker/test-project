@@ -34,6 +34,9 @@ public class FileInfoEntity {
     String filePath;
 
     @Column(nullable = false)
+    String fileExt;
+
+    @Column(nullable = false)
     FileStates fileState;
 
     @Column(nullable = false)

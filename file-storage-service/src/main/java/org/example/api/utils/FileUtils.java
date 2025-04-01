@@ -1,6 +1,7 @@
 package org.example.api.utils;
 
 import org.example.api.exceptions.BadRequestException;
+import org.example.api.exceptions.FileNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,19 +16,28 @@ import java.security.NoSuchAlgorithmException;
 @Component
 public class FileUtils {
     public String createFileInDir(String fileName, MultipartFile file, String pathToDir) {
-        throwExceptionIfFileIsNull(file);
+        try {
+            return createFileInDir(fileName, file.getBytes(), pathToDir);
+        } catch (IOException e) {
+            throw new BadRequestException("File can't be empty");
+        }
+    }
+
+    public String createFileInDir(String fileName, byte[] fileInByte, String pathToDir) {
+        if (fileInByte.length == 0) {
+            throw new BadRequestException("File can't be empty");
+        }
         createDirectoryIfNotExists(pathToDir);
 
         Path filePath = Paths.get(pathToDir, fileName);
         File dest = new File(filePath.toString());
 
         try {
-            file.transferTo(dest);
+            Files.write(filePath, fileInByte);
+            return filePath.toString();
         } catch (IOException e) {
             throw new BadRequestException("Save file error");
         }
-
-        return filePath.toString();
     }
 
     private void throwExceptionIfFileIsNull(MultipartFile file) {
@@ -62,5 +72,30 @@ public class FileUtils {
             hexString.append(String.format("%02x", b));
         }
         return hexString.toString();
+    }
+
+    public String getFileExtension(String fileName) {
+        if (fileName.isEmpty()) {
+            throw new BadRequestException("File name can't be empty");
+        }
+        System.out.println(fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length()));
+        return fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length());
+    }
+
+    public String getFileName(String path) {
+        return Paths.get(path).getFileName().toString();
+    }
+
+    public File getFileOrThrowException(String path) {
+        File file = new File(path);
+        throwExceptionIfFileISNotExists(file);
+
+        return file;
+    }
+
+    private void throwExceptionIfFileISNotExists(File file) {
+        if (!file.exists()  && !file.isDirectory()) {
+            throw new FileNotFoundException("File is not exists");
+        }
     }
 }
