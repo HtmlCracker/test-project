@@ -6,4 +6,6 @@ public interface ComprssionStrategy {
     byte[] compress(InputStream inputStream);
 
     byte[] deCompress(InputStream inputStream);
+
+    String getCompressedFileExtension();
 }

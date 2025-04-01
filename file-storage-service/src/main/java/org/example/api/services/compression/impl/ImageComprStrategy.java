@@ -14,4 +14,9 @@ public class ImageComprStrategy implements ComprssionStrategy {
     public byte[] deCompress(InputStream inputStream) {
         return new byte[0];
     }
+
+    @Override
+    public String getCompressedFileExtension() {
+        return "";
+    }
 }
