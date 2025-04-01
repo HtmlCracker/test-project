@@ -25,13 +25,8 @@ public class StorageService {
         String fileHash = fileUtils.calculateFileHash(file);
         String filePath = fileUtils.createFileInDir(fileHash, file, temporaryStoragePath);
         FileInfoEntity fileInfoEntity = constructNewEntity(file, fileHash, filePath);
-        FileInfoEntity savedFileInfoEntity = saveFileInfoEntity(fileInfoEntity);
 
-        return savedFileInfoEntity;
-    }
-
-    private FileInfoEntity saveFileInfoEntity(FileInfoEntity fileInfoEntity) {
-        return fileInfoRepository.save(fileInfoEntity);
+        return saveFileInfoEntity(fileInfoEntity);
     }
 
     private FileInfoEntity constructNewEntity(MultipartFile file,
@@ -45,5 +40,9 @@ public class StorageService {
                 .fileHash(fileHash)
                 .filePath(filePath)
                 .build();
+    }
+
+    private FileInfoEntity saveFileInfoEntity(FileInfoEntity fileInfoEntity) {
+        return fileInfoRepository.save(fileInfoEntity);
     }
 }
