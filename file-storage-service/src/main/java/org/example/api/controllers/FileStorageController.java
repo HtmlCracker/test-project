@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.api.dto.response.UploadFileResponseDto;
 import org.example.api.entities.FileInfoEntity;
+import org.example.api.exceptions.BadRequestException;
 import org.example.api.factories.response.UploadFileResponseDtoFactory;
 import org.example.api.services.StorageService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +26,10 @@ public class FileStorageController {
 
     @PostMapping(UPLOAD_FILE)
     public UploadFileResponseDto uploadFile(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new BadRequestException("File can't be empty");
+        }
+
         FileInfoEntity entity = storageService.temporaryUploadFile(file);
         return uploadFileResponseDtoFactory.makeUploadFileResponseDto(entity);
     }
