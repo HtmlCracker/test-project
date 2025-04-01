@@ -31,8 +31,9 @@ public class FileUtils {
     }
 
     private void throwExceptionIfFileIsNull(MultipartFile file) {
-        if (file.isEmpty())
+        if (file.isEmpty()) {
             throw new BadRequestException("File can't be empty");
+        }
     }
 
     public void createDirectoryIfNotExists(String pathToDir) {
