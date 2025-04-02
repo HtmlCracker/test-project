@@ -34,3 +34,4 @@ pom.xml.versions
 .swp
 Thumbs.db
 /file-storage-service/src/main/resources/application.env
+/tool-configs/
