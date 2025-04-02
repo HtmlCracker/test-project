@@ -40,10 +40,9 @@ public class FileUtils {
         }
     }
 
-    private void throwExceptionIfFileIsNull(MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new BadRequestException("File can't be empty");
-        }
+    public void deleteFile(String path) throws IOException {
+        getFileOrThrowException(path);
+        Files.delete(Paths.get(path));
     }
 
     public void createDirectoryIfNotExists(String pathToDir) {
@@ -53,6 +52,12 @@ public class FileUtils {
         } catch (IOException e) {
             throw new BadRequestException("Failed to create directory: " + dirPath);
         }
+    }
+
+    public String calculateUniqueFileHash(MultipartFile file) {
+        String baseHash = calculateFileHash(file);
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        return baseHash + timestamp;
     }
 
     public String calculateFileHash(MultipartFile file) {
@@ -88,13 +93,13 @@ public class FileUtils {
 
     public File getFileOrThrowException(String path) {
         File file = new File(path);
-        throwExceptionIfFileISNotExists(file);
+        throwExceptionIfFileIsNotExists(file);
 
         return file;
     }
 
-    private void throwExceptionIfFileISNotExists(File file) {
-        if (!file.exists()  && !file.isDirectory()) {
+    private void throwExceptionIfFileIsNotExists(File file) {
+        if (!file.exists() && !file.isDirectory()) {
             throw new FileNotFoundException("File is not exists");
         }
     }
