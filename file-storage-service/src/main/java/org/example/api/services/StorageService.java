@@ -6,19 +6,18 @@ import lombok.experimental.FieldDefaults;
 import org.example.api.entities.FileInfoEntity;
 import org.example.api.enums.FileStates;
 import org.example.api.repositories.FileInfoRepository;
-import org.example.api.services.compression.CompressorService;
 import org.example.api.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class StorageService {
-    final CompressorService compressorService;
+    final UploadProcessor uploadProcessor;
 
     final FileInfoRepository fileInfoRepository;
     final FileUtils fileUtils;
@@ -26,13 +25,11 @@ public class StorageService {
     @Value("${PATH_TO_TEMPORARY_STORAGE}")
     private String temporaryStoragePath;
 
-    public FileInfoEntity temporaryUploadFile(MultipartFile file) {
-        String fileHash = fileUtils.calculateFileHash(file);
+    public FileInfoEntity temporaryUploadFile(MultipartFile file) throws IOException {
+        String fileHash = fileUtils.calculateUniqueFileHash(file);
         String fileName = fileHash + "." + fileUtils.getFileExtension(file.getOriginalFilename());
         String filePath = fileUtils.createFileInDir(fileName, file, temporaryStoragePath);
         FileInfoEntity fileInfoEntity = constructNewEntity(file, fileHash, filePath);
-
-        compressorService.compressFileAndWrite(filePath);
 
         return saveFileInfoEntity(fileInfoEntity);
     }
