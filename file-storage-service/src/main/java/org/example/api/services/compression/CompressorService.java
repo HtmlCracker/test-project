@@ -2,12 +2,11 @@ package org.example.api.services.compression;
 
 import jakarta.annotation.PostConstruct;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.api.configs.FileTypeConfig;
 import org.example.api.exceptions.BadRequestException;
+import org.example.api.services.compression.impl.BinaryComprStrategy;
 import org.example.api.services.compression.impl.TextComprStrategy;
 import org.example.api.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +18,6 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.prefs.BackingStoreException;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
@@ -34,45 +32,45 @@ public class CompressorService {
 
     @PostConstruct
     public void initCompressionStrategies() {
-        System.out.println("iniiiiiiit");
+        ComprssionStrategy textComprStrategy = new TextComprStrategy();
         fileTypeConfig.getTextTypes().forEach(type -> {
-            if(!compressionStrategies.containsKey(type)) {
-                compressionStrategies.put(type, new TextComprStrategy());
-            }
+            compressionStrategies.putIfAbsent(type, textComprStrategy);
+        });
+
+        ComprssionStrategy binaryComprStrategy = new BinaryComprStrategy();
+        fileTypeConfig.getBinaryTypes().forEach(type -> {
+            compressionStrategies.putIfAbsent(type, binaryComprStrategy);
         });
     }
 
-    public void compressFileAndWrite(String path) {
+    public String compressFileAndWrite(String path) {
         File file = fileUtils.getFileOrThrowException(path);
         String fileType = fileUtils.getFileExtension(path);
+        ComprssionStrategy compressionStrategy = compressionStrategies.get(fileType);
 
-        System.out.println("Wot: " + fileType);
-
-        byte[] compressedByte = compressFile(file, fileType);
-        String pathToCompressedFile = writeFile(compressedByte, path, fileType);
+        byte[] compressedByte = compressFile(file, compressionStrategy);
+        String pathToCompressedFile = writeFile(compressedByte, path, compressionStrategy);
 
         System.out.println(pathToCompressedFile);
+        return pathToCompressedFile;
     }
 
-    private byte[] compressFile(File file, String fileType) {
-        System.out.println(fileType);
-        ComprssionStrategy compressionStrategy = compressionStrategies.get(fileType);
-        System.out.println(compressionStrategy.getCompressedFileExtension());
+    private byte[] compressFile(File file,
+                                ComprssionStrategy compressionStrategy) {
         try {
             InputStream fileInputStream = new FileInputStream(file);
             return compressionStrategy.compress(fileInputStream);
-        } catch (Exception e) {
-            System.out.println("aaa");
-            throw new BadRequestException("aaa");
+        } catch (FileNotFoundException e) {
+            throw new BadRequestException("File not found.");
         }
     }
 
-    private String writeFile(byte[] compressedByte, String path, String fileType) {
-        ComprssionStrategy compressionStrategy = compressionStrategies.get(fileType);
+    private String writeFile(byte[] compressedByte,
+                             String oldPath,
+                             ComprssionStrategy compressionStrategy) {
         String fileExc = compressionStrategy.getCompressedFileExtension();
-        String fileName = fileUtils.getFileName(path) + fileExc;
-        String directoryPath = path.substring(0, path.lastIndexOf('/') + 1);
+        String fileName = fileUtils.getFileName(oldPath) + fileExc;
 
-        return fileUtils.createFileInDir(fileName, compressedByte, directoryPath);
+        return fileUtils.createFileInDir(fileName, compressedByte, compressedStoragePath);
     }
 }
