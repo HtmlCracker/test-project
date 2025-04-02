@@ -36,6 +36,7 @@ public class FileInfoEntity {
     @Column(nullable = false)
     String fileExt;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     FileStates fileState;
 
