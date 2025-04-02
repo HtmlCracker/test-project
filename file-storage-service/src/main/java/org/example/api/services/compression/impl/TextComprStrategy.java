@@ -2,6 +2,7 @@ package org.example.api.services.compression.impl;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.example.api.exceptions.BadRequestException;
 import org.example.api.services.compression.ComprssionStrategy;
 
 import java.io.ByteArrayOutputStream;
@@ -19,7 +20,7 @@ public class TextComprStrategy implements ComprssionStrategy {
             gzipOutputStream.finish();
             return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new BadRequestException("Gzip compression failed.");
         }
     }
 
