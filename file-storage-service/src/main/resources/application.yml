@@ -14,8 +14,11 @@ encryption:
 
   binary-types: bmp,cr2,nef,arw,dng,tiff,psd,wav,aiff,pdf
 
-  compressed-types: jpg,jpeg,png,gif,webp,zip,rar,7z,gz,tar,bz2,docx,xlsx,pptx,odp,odg,epub
+  video-types: avi,mov,mxf,prores,dnxhd
 
+  compressed-types: jpg,jpeg,png,gif,webp,zip,rar,7z,gz,tar,bz2,
+              docx,xlsx,pptx,odp,odg,epub,mp3,aac,ogg,wma,opus,amr,
+              m4a,ac3,eac3,ra,mp4,mkv,webm,flv,3gp
 spring:
 
   servlet:
