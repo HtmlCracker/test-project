@@ -6,7 +6,7 @@ PATH_TO_COMPRESSED_STORAGE: /files/compressed-storage
 PATH_TO_ENCRYPTED_STORAGE: /files/encrypted-storage
 PATH_TO_PERMANENT_STORAGE: /files/permanent-storage
 
-encryption:
+compression:
   text-types: txt,log,md,csv,tsv,json,xml,yaml,yml,ini,conf,
               cfg,properties,env,html,htm,css,js,sh,bash,ps1,
               py,php,rb,java,kt,go,rs,c,cpp,h,hpp,rtf,odt,ods,
