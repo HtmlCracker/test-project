@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 @Component
@@ -16,9 +14,12 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Data
 public class FileTypeConfig {
-    @Value("${encryption.text-types}")
+    @Value("${compression.text-types}")
     Set<String> textTypes;
 
-    @Value("${encryption.binary-types}")
+    @Value("${compression.binary-types}")
     Set<String> binaryTypes;
+
+    @Value("${compression.video-types}")
+    Set<String> videoTypes;
 }
