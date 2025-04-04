@@ -54,5 +54,5 @@ public class FileInfoEntity {
     @UpdateTimestamp
     LocalDateTime updatedAt;
 
-    Long compressedSize;
+    Long currentSize;
 }
