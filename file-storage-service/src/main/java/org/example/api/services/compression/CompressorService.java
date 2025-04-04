@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.api.configs.FileTypeConfig;
+import org.example.api.dto.service.CompressedFileDto;
 import org.example.api.exceptions.BadRequestException;
 import org.example.api.services.compression.impl.BinaryComprStrategy;
 import org.example.api.services.compression.impl.TextComprStrategy;
@@ -43,7 +44,7 @@ public class CompressorService {
         });
     }
 
-    public String compressFileAndWrite(String path) {
+    public CompressedFileDto compressFileAndWrite(String path) {
         File file = fileUtils.getFileOrThrowException(path);
         String fileType = fileUtils.getFileExtension(path);
         ComprssionStrategy compressionStrategy = compressionStrategies.get(fileType);
@@ -51,8 +52,10 @@ public class CompressorService {
         byte[] compressedByte = compressFile(file, compressionStrategy);
         String pathToCompressedFile = writeFile(compressedByte, path, compressionStrategy);
 
-        System.out.println(pathToCompressedFile);
-        return pathToCompressedFile;
+        return CompressedFileDto.builder()
+                .path(pathToCompressedFile)
+                .compressedSize((long) compressedByte.length)
+                .build();
     }
 
     private byte[] compressFile(File file,
