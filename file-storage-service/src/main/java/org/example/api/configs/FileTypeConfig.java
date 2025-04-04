@@ -19,7 +19,4 @@ public class FileTypeConfig {
 
     @Value("${compression.binary-types}")
     Set<String> binaryTypes;
-
-    @Value("${compression.video-types}")
-    Set<String> videoTypes;
 }
