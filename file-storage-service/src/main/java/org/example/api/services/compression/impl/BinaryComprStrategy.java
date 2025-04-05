@@ -1,8 +1,10 @@
 package org.example.api.services.compression.impl;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.compress.compressors.lz4.FramedLZ4CompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.example.api.exceptions.BadRequestException;
 import org.example.api.services.compression.ComprssionStrategy;
 
 import java.io.IOException;
@@ -12,12 +14,14 @@ public class BinaryComprStrategy implements ComprssionStrategy {
     @Override
     public byte[] compress(InputStream inputStream) {
         try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-             GzipCompressorOutputStream gzipOut = new GzipCompressorOutputStream(byteOut)) {
-            IOUtils.copy(inputStream, gzipOut);
-            gzipOut.finish();
+                FramedLZ4CompressorOutputStream lz4Out = new FramedLZ4CompressorOutputStream(byteOut)) {
+            IOUtils.copy(inputStream, lz4Out);
+
+            lz4Out.finish();
+
             return byteOut.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("GZIP compression failed", e);
+            throw new BadRequestException("LZ4 compression failed");
         }
     }
 
@@ -28,6 +32,6 @@ public class BinaryComprStrategy implements ComprssionStrategy {
 
     @Override
     public String getCompressedFileExtension() {
-        return ".gz";
+        return ".lz4";
     }
 }
