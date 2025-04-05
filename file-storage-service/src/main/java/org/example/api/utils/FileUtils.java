@@ -87,6 +87,20 @@ public class FileUtils {
         return fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length());
     }
 
+    public String getFileMime(File file) {
+        try {
+            String mimeType = Files.probeContentType(file.toPath());
+
+            if (mimeType == null) {
+                return "unknown";
+            }
+
+            return mimeType.split("/")[0];
+        } catch (IOException e) {
+            return "unknown";
+        }
+    }
+
     public String getFileName(String path) {
         return Paths.get(path).getFileName().toString();
     }
