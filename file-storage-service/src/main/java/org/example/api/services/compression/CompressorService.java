@@ -34,20 +34,19 @@ public class CompressorService {
     @PostConstruct
     public void initCompressionStrategies() {
         ComprssionStrategy textComprStrategy = new TextComprStrategy();
-        fileTypeConfig.getTextTypes().forEach(type -> {
-            compressionStrategies.putIfAbsent(type, textComprStrategy);
-        });
+        String textType = fileTypeConfig.getTextType();
+        compressionStrategies.putIfAbsent(textType, textComprStrategy);
 
         ComprssionStrategy binaryComprStrategy = new BinaryComprStrategy();
-        fileTypeConfig.getBinaryTypes().forEach(type -> {
-            compressionStrategies.putIfAbsent(type, binaryComprStrategy);
-        });
+        String binaryType = fileTypeConfig.getBinaryType();
+        compressionStrategies.putIfAbsent(binaryType, binaryComprStrategy);
     }
 
     public CompressedFileDto compressFileAndWrite(String path) {
         File file = fileUtils.getFileOrThrowException(path);
-        String fileType = fileUtils.getFileExtension(path);
-        ComprssionStrategy compressionStrategy = compressionStrategies.get(fileType);
+        String fileMimeType = fileUtils.getFileMime(file);
+        System.out.println(fileMimeType + " +++++++");
+        ComprssionStrategy compressionStrategy = compressionStrategies.get(fileMimeType);
 
         byte[] compressedByte = compressFile(file, compressionStrategy);
         String pathToCompressedFile = writeFile(compressedByte, path, compressionStrategy);

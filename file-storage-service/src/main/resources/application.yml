@@ -7,16 +7,10 @@ PATH_TO_ENCRYPTED_STORAGE: /files/encrypted-storage
 PATH_TO_PERMANENT_STORAGE: /files/permanent-storage
 
 compression:
-  text-types: txt,log,md,csv,tsv,json,xml,yaml,yml,ini,conf,
-              cfg,properties,env,html,htm,css,js,sh,bash,ps1,
-              py,php,rb,java,kt,go,rs,c,cpp,h,hpp,rtf,odt,ods,
-              tex,vcf,ics,sub,srt,svg
+  text-type: text
 
-  binary-types: bmp,cr2,nef,arw,dng,tiff,psd,wav,aiff,pdf
+  binary-type: application
 
-  compressed-types: jpg,jpeg,png,gif,webp,zip,rar,7z,gz,tar,bz2,
-              docx,xlsx,pptx,odp,odg,epub,mp3,aac,ogg,wma,opus,amr,
-              m4a,ac3,eac3,ra,mp4,mkv,webm,flv,3gp
 spring:
 
   servlet:
