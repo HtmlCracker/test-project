@@ -1,4 +1,4 @@
-package org.example.api.services.compression;
+package org.example.api.services.compression.interfaces;
 
 import java.io.InputStream;
 

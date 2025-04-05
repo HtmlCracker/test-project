@@ -9,6 +9,7 @@ import org.example.api.dto.service.CompressedFileDto;
 import org.example.api.exceptions.BadRequestException;
 import org.example.api.services.compression.impl.BinaryComprStrategy;
 import org.example.api.services.compression.impl.TextComprStrategy;
+import org.example.api.services.compression.interfaces.ComprssionStrategy;
 import org.example.api.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

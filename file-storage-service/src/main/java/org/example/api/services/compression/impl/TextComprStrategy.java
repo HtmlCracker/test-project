@@ -3,7 +3,7 @@ package org.example.api.services.compression.impl;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.example.api.exceptions.BadRequestException;
-import org.example.api.services.compression.ComprssionStrategy;
+import org.example.api.services.compression.interfaces.ComprssionStrategy;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

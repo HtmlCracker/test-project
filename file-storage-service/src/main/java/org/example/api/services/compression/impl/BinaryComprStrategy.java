@@ -1,11 +1,10 @@
 package org.example.api.services.compression.impl;
 
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.compressors.lz4.FramedLZ4CompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.example.api.exceptions.BadRequestException;
-import org.example.api.services.compression.ComprssionStrategy;
+import org.example.api.services.compression.interfaces.ComprssionStrategy;
 
 import java.io.IOException;
 import java.io.InputStream;
