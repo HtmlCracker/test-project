@@ -1,10 +1,8 @@
-package org.example.api;
+package org.example.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.api.controllers.ProfileController;
 import org.example.api.dto.request.ProfileRegistrationRequestDto;
-import org.example.api.dto.response.ProfileResponseDto;
-import org.example.api.entities.ProfileEntity;
 import org.example.api.factories.ProfileDtoFactory;
 import org.example.api.services.ProfileService;
 import org.junit.jupiter.api.Test;
@@ -22,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(controllers = ProfileController.class)
-public class ProfileControllerTest {
+public class RegistrProfileControllerTest {
     private MockMvcRequestBuilders mockMvcBuilder;
 
     @Autowired
@@ -65,10 +63,8 @@ public class ProfileControllerTest {
     @Test
     void registerProfile_WithEmailOk_ShouldThrowOk() throws Exception {
         String email = "test@test.ru";
-        registerProfile_WithSomeEmailAndName_ShouldThrowOk(email, "test");
+        registerProfile_WithSomeEmailAndName_ShouldBeOk(email, "test");
     }
-
-
 
     @Test
     void registerProfile_WithVoidName_ShouldThrowBadRequest() throws Exception {
@@ -85,7 +81,7 @@ public class ProfileControllerTest {
     @Test
     void registerProfile_WithOkName_ShouldThrowOk() throws Exception {
         String name = "test";
-        registerProfile_WithSomeEmailAndName_ShouldThrowOk("test@test.ru", name);
+        registerProfile_WithSomeEmailAndName_ShouldBeOk("test@test.ru", name);
     }
 
 
@@ -114,7 +110,7 @@ public class ProfileControllerTest {
                 .andExpect(status().isBadRequest()).andReturn();
     }
 
-    void registerProfile_WithSomeEmailAndName_ShouldThrowOk(String email, String name) throws Exception {
+    void registerProfile_WithSomeEmailAndName_ShouldBeOk(String email, String name) throws Exception {
         ProfileRegistrationRequestDto requestDto = makeProfileRegistrationRequestDto(email, name, "test", "", "");
 
         RequestBuilder request = mockMvcBuilder.post("/api/public/accounts/registration")
