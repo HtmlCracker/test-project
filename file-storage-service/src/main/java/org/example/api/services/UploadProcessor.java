@@ -3,11 +3,13 @@ package org.example.api.services;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.bouncycastle.crypto.CryptoException;
 import org.example.api.dto.service.CompressedFileDto;
 import org.example.api.entities.FileInfoEntity;
 import org.example.api.exceptions.NotFoundException;
 import org.example.api.repositories.FileInfoRepository;
 import org.example.api.services.compression.CompressorService;
+import org.example.api.services.encryption.EncryptorService;
 import org.example.api.utils.FileUtils;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ import java.io.IOException;
 public class UploadProcessor {
     FileInfoRepository fileInfoRepository;
     CompressorService compressorService;
+    EncryptorService encryptorService;
     FileUtils fileUtils;
 
     public FileInfoEntity compress(String path) throws IOException {
