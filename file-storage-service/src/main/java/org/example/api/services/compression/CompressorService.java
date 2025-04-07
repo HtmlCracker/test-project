@@ -46,7 +46,6 @@ public class CompressorService {
     public CompressedFileDto compressFileAndWrite(String path) {
         File file = fileUtils.getFileOrThrowException(path);
         String fileMimeType = fileUtils.getFileMime(file);
-        System.out.println(fileMimeType + " +++++++");
         ComprssionStrategy compressionStrategy = compressionStrategies.get(fileMimeType);
 
         byte[] compressedByte = compressFile(file, compressionStrategy);
