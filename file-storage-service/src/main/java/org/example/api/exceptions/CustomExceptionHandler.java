@@ -14,6 +14,15 @@ import java.util.Map;
 @Slf4j
 @ControllerAdvice
 public class CustomExceptionHandler {
+    @ExceptionHandler(FileProcessingException.class)
+    public ResponseEntity<ErrorDto> handleFileProcessingException(FileProcessingException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorDto.builder()
+                        .error("File Processing Error")
+                        .errorDescription(ex.getMessage())
+                        .build());
+    }
+
     @ExceptionHandler(FileNotFoundException.class)
     public ResponseEntity<Object> handleFileNotFoundException(FileNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
