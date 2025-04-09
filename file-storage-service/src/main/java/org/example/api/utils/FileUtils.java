@@ -2,6 +2,7 @@ package org.example.api.utils;
 
 import org.example.api.exceptions.BadRequestException;
 import org.example.api.exceptions.FileNotFoundException;
+import org.example.api.exceptions.FileProcessingException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,9 +41,15 @@ public class FileUtils {
         }
     }
 
-    public void deleteFile(String path) throws IOException {
+    public void deleteFile(String path) {
         getFileOrThrowException(path);
-        Files.delete(Paths.get(path));
+        try {
+            Files.delete(Paths.get(path));
+        } catch (IOException e) {
+            throw new FileProcessingException(
+                    String.format("Error processing file with path: %s", path)
+            );
+        }
     }
 
     public void createDirectoryIfNotExists(String pathToDir) {
@@ -83,7 +90,6 @@ public class FileUtils {
         if (fileName.isEmpty()) {
             throw new BadRequestException("File name can't be empty");
         }
-        System.out.println(fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length()));
         return fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length());
     }
 
