@@ -3,7 +3,6 @@ package org.example.api.services.encryption;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.bouncycastle.crypto.CryptoException;
 import org.example.api.utils.EncryptionUtils;
 import org.example.api.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,11 +23,11 @@ public class EncryptorService {
     @Value("${PATH_TO_ENCRYPTED_STORAGE}")
     String encryptedStoragePath;
 
-    public String encryptFileAndWrite(String path) throws CryptoException {
+    public String encryptFileAndWrite(String path) {
         File file = fileUtils.getFileOrThrowException(path);
-        File compressedFile = new File(encryptedStoragePath + "/" + file.getName());
-        encryptionUtils.encrypt(encryptionKey, file, compressedFile);
+            byte[] encryptedBytes = encryptionUtils.encrypt(encryptionKey, file);
 
-        return "";
+        System.out.println(encryptedBytes.toString());
+        return encryptedBytes.toString();
     }
 }
