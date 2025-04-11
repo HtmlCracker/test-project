@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.api.dto.service.CompressedFileDto;
+import org.example.api.dto.service.EncryptedFileDto;
 import org.example.api.entities.FileInfoEntity;
 import org.example.api.exceptions.NotFoundException;
 import org.example.api.repositories.FileInfoRepository;
@@ -26,7 +27,16 @@ public class UploadProcessor {
         String newPath = dto.getPath();
         deleteSourceAfterProcessing(path);
 
-        return updateFileInfoEntity(path, newPath, dto.getCompressedSize());
+        updateFileInfoEntity(path, newPath, dto.getCompressedSize());
+        return encrypt(newPath);
+    }
+
+    public FileInfoEntity encrypt(String path) {
+        EncryptedFileDto dto = encryptorService.encryptFileAndWrite(path);
+        String newPath = dto.getPath();
+        deleteSourceAfterProcessing(path);
+
+        return updateFileInfoEntity(path, newPath, dto.getEncryptedSize());
     }
 
     private FileInfoEntity updateFileInfoEntity(String oldPath,
