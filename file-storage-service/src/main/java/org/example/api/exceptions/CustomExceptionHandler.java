@@ -14,6 +14,15 @@ import java.util.Map;
 @Slf4j
 @ControllerAdvice
 public class CustomExceptionHandler {
+    @ExceptionHandler(CryptoException.class)
+    public ResponseEntity<ErrorDto> handleCryptoException(CryptoException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorDto.builder()
+                        .error("Crypto error")
+                        .errorDescription(ex.getMessage())
+                        .build());
+    }
+
     @ExceptionHandler(FileProcessingException.class)
     public ResponseEntity<ErrorDto> handleFileProcessingException(FileProcessingException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
