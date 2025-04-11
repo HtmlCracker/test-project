@@ -4,5 +4,5 @@ public enum FileStates {
     UPLOADED,
     COMPRESSED,
     ENCRYPTED,
-    SAVED
+    STORED
 }
