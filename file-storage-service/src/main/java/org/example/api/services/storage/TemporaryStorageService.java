@@ -1,4 +1,4 @@
-package org.example.api.services;
+package org.example.api.services.storage;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -11,21 +11,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
-public class StorageService {
-    final UploadProcessor uploadProcessor;
-
+public class TemporaryStorageService {
     final FileInfoRepository fileInfoRepository;
     final FileUtils fileUtils;
 
     @Value("${PATH_TO_TEMPORARY_STORAGE}")
     private String temporaryStoragePath;
 
-    public FileInfoEntity temporaryUploadFile(MultipartFile file) throws IOException {
+    public FileInfoEntity temporaryUploadFile(MultipartFile file) {
         String fileHash = fileUtils.calculateUniqueFileHash(file);
         String fileName = fileHash + "." + fileUtils.getFileExtension(file.getOriginalFilename());
         String filePath = fileUtils.createFileInDir(fileName, file, temporaryStoragePath);
