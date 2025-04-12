@@ -24,6 +24,14 @@ public class FileUtils {
         }
     }
 
+    public String createFileInDir(String fileName, File file, String pathToDir) {
+        try {
+            return createFileInDir(fileName, Files.readAllBytes(file.toPath()), pathToDir);
+        } catch (IOException e) {
+            throw new BadRequestException("File can't be empty");
+        }
+    }
+
     public String createFileInDir(String fileName, byte[] fileInByte, String pathToDir) {
         if (fileInByte.length == 0) {
             throw new BadRequestException("File can't be empty");
