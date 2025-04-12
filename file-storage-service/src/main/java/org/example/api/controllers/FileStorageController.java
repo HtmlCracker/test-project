@@ -8,7 +8,7 @@ import org.example.api.dto.response.UploadFileResponseDto;
 import org.example.api.entities.FileInfoEntity;
 import org.example.api.exceptions.BadRequestException;
 import org.example.api.factories.response.UploadFileResponseDtoFactory;
-import org.example.api.services.StorageService;
+import org.example.api.services.storage.TemporaryStorageService;
 import org.example.api.services.UploadProcessor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,7 +23,7 @@ import java.io.IOException;
 @RestController
 public class FileStorageController {
     UploadFileResponseDtoFactory uploadFileResponseDtoFactory;
-    StorageService storageService;
+    TemporaryStorageService storageService;
     UploadProcessor uploadProcessor;
 
     public static final String UPLOAD_FILE = "api/private/file-storage/upload";
@@ -40,7 +40,9 @@ public class FileStorageController {
         FileInfoEntity entity = storageService.temporaryUploadFile(file);
 
         FileInfoEntity compressedEntity = uploadProcessor.compress(entity.getFilePath());
-
-        return uploadFileResponseDtoFactory.makeUploadFileResponseDto(compressedEntity);
+        FileInfoEntity encryptedEntity = uploadProcessor.encrypt(compressedEntity.getFilePath());
+        FileInfoEntity storedEntity = uploadProcessor.store(encryptedEntity.getFilePath());
+        System.out.println(storedEntity.getFilePath());
+        return uploadFileResponseDtoFactory.makeUploadFileResponseDto(storedEntity);
     }
 }
