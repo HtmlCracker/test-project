@@ -18,7 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
-import org.example.api.enums.FileStates;
+import org.example.api.statemachine.enums.FileState;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -53,7 +53,7 @@ public class FileInfoEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    FileStates fileState;
+    FileState fileState;
 
     @Column(nullable = false)
     @Builder.Default
