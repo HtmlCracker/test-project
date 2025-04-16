@@ -282,7 +282,7 @@ public class ProfileControllerTest {
     }
 
     @Test
-    void delProfile_shouldThrowNotFoundException() throws Exception {
+    void delProfile_shouldThrowBadRequestException() throws Exception {
         UUID profileId = UUID.randomUUID();
 
         when(profileService.delProfile(profileId))
