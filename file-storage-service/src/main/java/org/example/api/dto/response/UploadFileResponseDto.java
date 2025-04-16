@@ -2,7 +2,7 @@ package org.example.api.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.example.api.enums.FileStates;
+import org.example.api.statemachine.enums.FileState;
 
 import java.util.UUID;
 
@@ -14,6 +14,6 @@ import java.util.UUID;
 public class UploadFileResponseDto {
     UUID fileId;
     Long originalFileSize;
-    FileStates fileState;
+    FileState fileState;
     String originalFileName;
 }

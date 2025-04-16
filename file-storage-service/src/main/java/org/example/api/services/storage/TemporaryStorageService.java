@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.api.entities.FileInfoEntity;
-import org.example.api.enums.FileStates;
+import org.example.api.statemachine.enums.FileState;
 import org.example.api.repositories.FileInfoRepository;
 import org.example.api.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,7 +40,7 @@ public class TemporaryStorageService {
                 .originalFileName(origFileName)
                 .originalFileSize(file.getSize())
                 .fileExt(fileExt)
-                .fileState(FileStates.UPLOADED)
+                .fileState(FileState.UPLOADED)
                 .fileHash(fileHash)
                 .filePath(filePath)
                 .build();
