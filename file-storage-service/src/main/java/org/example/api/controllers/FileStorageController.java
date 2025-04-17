@@ -10,6 +10,7 @@ import org.example.api.exceptions.BadRequestException;
 import org.example.api.exceptions.NotFoundException;
 import org.example.api.factories.response.UploadFileResponseDtoFactory;
 import org.example.api.repositories.FileInfoRepository;
+import org.example.api.services.FileInfoCacheService;
 import org.example.api.services.FileProcessorService;
 import org.example.api.services.storage.TemporaryStorageService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class FileStorageController {
     FileInfoRepository fileInfoRepository;
+    FileInfoCacheService fileInfoCacheService;
     UploadFileResponseDtoFactory uploadFileResponseDtoFactory;
     TemporaryStorageService storageService;
     FileProcessorService fileProcessorService;
@@ -38,10 +40,7 @@ public class FileStorageController {
 
         fileProcessorService.processFile(entity.getId().toString());
 
-        FileInfoEntity fileInfoEntity = fileInfoRepository.findById(entity.getId())
-                .orElseThrow(() -> new NotFoundException(
-                        String.format("Entity with id: %s is not exists", entity.getId().toString()))
-                );
+        FileInfoEntity fileInfoEntity = fileInfoCacheService.getFileEntityById(entity.getId());
 
         return uploadFileResponseDtoFactory.makeUploadFileResponseDto(fileInfoEntity);
     }
