@@ -8,8 +8,6 @@ import org.example.api.dto.service.EncryptedFileDto;
 import org.example.api.dto.service.StoredFileDto;
 import org.example.api.entities.FileInfoEntity;
 import org.example.api.entities.FolderEntity;
-import org.example.api.exceptions.NotFoundException;
-import org.example.api.repositories.FileInfoRepository;
 import org.example.api.repositories.FolderRepository;
 import org.example.api.services.compression.CompressorService;
 import org.example.api.services.encryption.EncryptorService;
@@ -26,7 +24,7 @@ import java.util.UUID;
 @WithStateMachine
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UploadProcessor {
-    FileInfoRepository fileInfoRepository;
+    FileInfoCacheService fileInfoCacheService;
     FolderRepository folderRepository;
     CompressorService compressorService;
     EncryptorService encryptorService;
@@ -35,7 +33,7 @@ public class UploadProcessor {
 
     public void compress(String id) {
         UUID fileId = UUID.fromString(id);
-        FileInfoEntity entity = getFileEntityBuId(fileId);
+        FileInfoEntity entity = fileInfoCacheService.getFileEntityById(fileId);
         String path = entity.getFilePath();
 
         CompressedFileDto dto = compressorService.compressFileAndWrite(path);
@@ -46,7 +44,7 @@ public class UploadProcessor {
 
     public void encrypt(String id) {
         UUID fileId = UUID.fromString(id);
-        FileInfoEntity entity = getFileEntityBuId(fileId);
+        FileInfoEntity entity = fileInfoCacheService.getFileEntityById(fileId);
         String path = entity.getFilePath();
 
         EncryptedFileDto dto = encryptorService.encryptFileAndWrite(path);
@@ -57,7 +55,7 @@ public class UploadProcessor {
 
     public void store(String id) {
         UUID fileId = UUID.fromString(id);
-        FileInfoEntity entity = getFileEntityBuId(fileId);
+        FileInfoEntity entity = fileInfoCacheService.getFileEntityById(fileId);
         String path = entity.getFilePath();
 
         StoredFileDto dto = permanentStorageService.permanentUploadFile(path);
@@ -70,41 +68,30 @@ public class UploadProcessor {
         bindFileToFolder(dto.getFolderEntity(), updatedFileInfoEntity);
     }
 
-    private FileInfoEntity updateFileInfoEntity(String oldPath,
+    private FileInfoEntity updateFileInfoEntity(String path,
                                                 String newPath,
                                                 Long newSize,
                                                 FileState fileState) {
-        FileInfoEntity fileInfoEntity = fileInfoRepository.findByFilePath(oldPath)
-                .orElseThrow(() -> new NotFoundException(
-                        String.format("Entity with path: %s is not exists.", oldPath)
-                ));
+        FileInfoEntity fileInfoEntity = fileInfoCacheService.getFileEntityByPath(path);
+
         fileInfoEntity.setFilePath(newPath);
         fileInfoEntity.setCurrentSize(newSize);
         fileInfoEntity.setFileState(fileState);
-        return fileInfoRepository.save(fileInfoEntity);
+        return fileInfoCacheService.saveFileInfoEntity(fileInfoEntity);
     }
 
-    private FileInfoEntity updateFileInfoEntity(String oldPath,
+    private FileInfoEntity updateFileInfoEntity(String path,
                                                 String newPath,
                                                 Long newSize,
                                                 FolderEntity folderEntity,
                                                 FileState fileState) {
-        FileInfoEntity fileInfoEntity = fileInfoRepository.findByFilePath(oldPath)
-                .orElseThrow(() -> new NotFoundException(
-                        String.format("Entity with path: %s is not exists.", oldPath)
-                ));
+        FileInfoEntity fileInfoEntity = fileInfoCacheService.getFileEntityByPath(path);
+
         fileInfoEntity.setFilePath(newPath);
         fileInfoEntity.setCurrentSize(newSize);
         fileInfoEntity.setFolder(folderEntity);
         fileInfoEntity.setFileState(fileState);
-        return fileInfoRepository.save(fileInfoEntity);
-    }
-
-    private FileInfoEntity getFileEntityBuId(UUID id) {
-        return fileInfoRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        String.format("Entity with path: %s is not exists.", id)
-                ));
+        return fileInfoCacheService.saveFileInfoEntity(fileInfoEntity);
     }
 
     private FolderEntity bindFileToFolder(FolderEntity folderEntity, FileInfoEntity fileInfoEntity) {
@@ -116,10 +103,10 @@ public class UploadProcessor {
 
         folderEntity.getFiles().add(fileInfoEntity);
 
-        return save(folderEntity);
+        return saveFolderEntity(folderEntity);
     }
 
-    private FolderEntity save(FolderEntity folder) {
+    private FolderEntity saveFolderEntity(FolderEntity folder) {
         return folderRepository.save(folder);
     }
 
