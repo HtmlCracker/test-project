@@ -4,8 +4,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.api.entities.FileInfoEntity;
+import org.example.api.services.FileInfoCacheService;
 import org.example.api.statemachine.enums.FileState;
-import org.example.api.repositories.FileInfoRepository;
 import org.example.api.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,8 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class TemporaryStorageService {
-    final FileInfoRepository fileInfoRepository;
     final FileUtils fileUtils;
+    final FileInfoCacheService fileInfoCacheService;
 
     @Value("${PATH_TO_TEMPORARY_STORAGE}")
     private String temporaryStoragePath;
@@ -27,7 +27,7 @@ public class TemporaryStorageService {
         String filePath = fileUtils.createFileInDir(fileName, file, temporaryStoragePath);
         FileInfoEntity fileInfoEntity = constructNewEntity(file, fileHash, filePath);
 
-        return saveFileInfoEntity(fileInfoEntity);
+        return fileInfoCacheService.saveFileInfoEntity(fileInfoEntity);
     }
 
     private FileInfoEntity constructNewEntity(MultipartFile file,
@@ -44,9 +44,5 @@ public class TemporaryStorageService {
                 .fileHash(fileHash)
                 .filePath(filePath)
                 .build();
-    }
-
-    private FileInfoEntity saveFileInfoEntity(FileInfoEntity fileInfoEntity) {
-        return fileInfoRepository.save(fileInfoEntity);
     }
 }
