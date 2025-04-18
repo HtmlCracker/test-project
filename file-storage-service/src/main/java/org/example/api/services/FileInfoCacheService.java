@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.api.entities.FileInfoEntity;
 import org.example.api.exceptions.NotFoundException;
 import org.example.api.repositories.FileInfoRepository;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -29,7 +30,7 @@ public class FileInfoCacheService {
         return fileInfoRepository.save(entity);
     }
 
-    @Cacheable(value = "fileInfoCache", key = "#id")
+    @Cacheable(value = "fileInfoCacheById", key = "#id")
     public FileInfoEntity getFileEntityById(UUID id) {
         return fileInfoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("File not found"));
@@ -39,5 +40,13 @@ public class FileInfoCacheService {
     public FileInfoEntity getFileEntityByPath(String path) {
         return fileInfoRepository.findByFilePath(path)
                 .orElseThrow(() -> new NotFoundException("File not found"));
+    }
+
+    @Caching(evict = {
+            @CacheEvict(value = "fileInfoCacheById", key = "#entity.id"),
+            @CacheEvict(value = "fileInfoCacheByPath", key = "#entity.filePath"),
+    })
+    public void deleteFile(FileInfoEntity entity) {
+        fileInfoRepository.delete(entity);
     }
 }
