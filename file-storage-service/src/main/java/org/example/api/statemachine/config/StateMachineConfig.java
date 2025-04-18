@@ -3,7 +3,7 @@ package org.example.api.statemachine.config;
 import lombok.RequiredArgsConstructor;
 import org.example.api.statemachine.enums.FileEvent;
 import org.example.api.statemachine.enums.FileState;
-import org.example.api.services.UploadProcessor;
+import org.example.api.services.FileStorageService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
@@ -18,7 +18,7 @@ import java.util.EnumSet;
 @Configuration
 @EnableStateMachineFactory
 public class StateMachineConfig extends StateMachineConfigurerAdapter<FileState, FileEvent> {
-    private final UploadProcessor uploadProcessor;
+    private final FileStorageService fileStorageService;
 
     @Override
     public void configure(StateMachineStateConfigurer<FileState, FileEvent> states) throws Exception {
@@ -58,7 +58,7 @@ public class StateMachineConfig extends StateMachineConfigurerAdapter<FileState,
     public Action<FileState, FileEvent> compressAction() {
         return context -> {
             String fileId = (String) context.getExtendedState().getVariables().get("fileId");
-            uploadProcessor.compress(fileId);
+            fileStorageService.compress(fileId);
         };
     }
 
@@ -66,7 +66,7 @@ public class StateMachineConfig extends StateMachineConfigurerAdapter<FileState,
     public Action<FileState, FileEvent> encryptAction() {
         return context -> {
             String fileId = (String) context.getExtendedState().getVariables().get("fileId");
-            uploadProcessor.encrypt(fileId);
+            fileStorageService.encrypt(fileId);
         };
     }
 
@@ -74,7 +74,7 @@ public class StateMachineConfig extends StateMachineConfigurerAdapter<FileState,
     public Action<FileState, FileEvent> storeAction() {
         return context -> {
             String fileId = (String) context.getExtendedState().getVariables().get("fileId");
-            uploadProcessor.store(fileId);
+            fileStorageService.store(fileId);
         };
     }
 }
