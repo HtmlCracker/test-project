@@ -3,11 +3,14 @@ package org.example.api.services;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.example.api.dto.response.DeleteFileResponseDto;
 import org.example.api.dto.service.CompressedFileDto;
 import org.example.api.dto.service.EncryptedFileDto;
 import org.example.api.dto.service.StoredFileDto;
 import org.example.api.entities.FileInfoEntity;
 import org.example.api.entities.FolderEntity;
+import org.example.api.exceptions.NotFoundException;
+import org.example.api.repositories.FileInfoRepository;
 import org.example.api.repositories.FolderRepository;
 import org.example.api.services.compression.CompressorService;
 import org.example.api.services.encryption.EncryptorService;
@@ -23,8 +26,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @WithStateMachine
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UploadProcessor {
+public class FileStorageService {
     FileInfoCacheService fileInfoCacheService;
+    FileInfoRepository fileInfoRepository;
     FolderRepository folderRepository;
     CompressorService compressorService;
     EncryptorService encryptorService;
@@ -66,6 +70,20 @@ public class UploadProcessor {
                 path, newPath, dto.getFileSize(), dto.getFolderEntity(), FileState.STORED
         );
         bindFileToFolder(dto.getFolderEntity(), updatedFileInfoEntity);
+    }
+
+    public DeleteFileResponseDto delete(UUID id) {
+        FileInfoEntity entity = fileInfoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Entity with id %s if not exists", id))
+                );
+
+        fileUtils.deleteFile(entity.getFilePath());
+        fileInfoCacheService.deleteFile(entity);
+
+        return DeleteFileResponseDto.builder()
+                .status("deleted")
+                .build();
     }
 
     private FileInfoEntity updateFileInfoEntity(String path,
