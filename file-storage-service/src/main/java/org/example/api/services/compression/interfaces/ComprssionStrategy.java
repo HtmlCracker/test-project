@@ -5,7 +5,7 @@ import java.io.InputStream;
 public interface ComprssionStrategy {
     byte[] compress(InputStream inputStream);
 
-    byte[] deCompress(InputStream inputStream);
+    byte[] deсompress(InputStream inputStream);
 
     String getCompressedFileExtension();
 }

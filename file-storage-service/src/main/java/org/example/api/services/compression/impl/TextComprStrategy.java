@@ -1,5 +1,6 @@
 package org.example.api.services.compression.impl;
 
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.example.api.exceptions.BadRequestException;
@@ -25,8 +26,16 @@ public class TextComprStrategy implements ComprssionStrategy {
     }
 
     @Override
-    public byte[] deCompress(InputStream inputStream) {
-        return new byte[0];
+    public byte[] deсompress(InputStream inputStream) {
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                GzipCompressorInputStream gzipInputStream =
+                        new GzipCompressorInputStream(inputStream)) {
+            IOUtils.copy(gzipInputStream, byteArrayOutputStream);
+
+            return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            throw new BadRequestException("Gzip decompression failed.");
+        }
     }
 
     @Override
