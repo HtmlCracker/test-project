@@ -15,7 +15,8 @@ import org.example.api.repositories.FolderRepository;
 import org.example.api.services.compression.CompressorService;
 import org.example.api.services.encryption.EncryptorService;
 import org.example.api.services.storage.PermanentStorageService;
-import org.example.api.statemachine.enums.FileState;
+import org.example.api.statemachine.state.upload.UploadFileState;
+import org.example.api.utils.EncryptionUtils;
 import org.example.api.utils.FileUtils;
 import org.springframework.statemachine.annotation.WithStateMachine;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class FileStorageService {
     CompressorService compressorService;
     EncryptorService encryptorService;
     PermanentStorageService permanentStorageService;
+
     FileUtils fileUtils;
 
     public void compress(String id) {
@@ -43,7 +45,7 @@ public class FileStorageService {
         CompressedFileDto dto = compressorService.compressFileAndWrite(path);
         String newPath = dto.getPath();
         deleteSourceAfterProcessing(path);
-        updateFileInfoEntity(path, newPath, dto.getCompressedSize(), FileState.COMPRESSED);
+        updateFileInfoEntity(path, newPath, dto.getCompressedSize(), UploadFileState.COMPRESSED);
     }
 
     public void encrypt(String id) {
@@ -54,7 +56,7 @@ public class FileStorageService {
         EncryptedFileDto dto = encryptorService.encryptFileAndWrite(path);
         String newPath = dto.getPath();
         deleteSourceAfterProcessing(path);
-        updateFileInfoEntity(path, newPath, dto.getEncryptedSize(), FileState.ENCRYPTED);
+        updateFileInfoEntity(path, newPath, dto.getEncryptedSize(), UploadFileState.ENCRYPTED);
     }
 
     public void store(String id) {
@@ -67,7 +69,7 @@ public class FileStorageService {
         deleteSourceAfterProcessing(path);
 
         FileInfoEntity updatedFileInfoEntity = updateFileInfoEntity(
-                path, newPath, dto.getFileSize(), dto.getFolderEntity(), FileState.STORED
+                path, newPath, dto.getFileSize(), dto.getFolderEntity(), UploadFileState.STORED
         );
         bindFileToFolder(dto.getFolderEntity(), updatedFileInfoEntity);
     }
@@ -86,10 +88,18 @@ public class FileStorageService {
                 .build();
     }
 
+    public void decrypt(String path) {
+        encryptorService.decryptFileAndWrite(path);
+    }
+
+    public void decompress() {
+
+    }
+
     private FileInfoEntity updateFileInfoEntity(String path,
                                                 String newPath,
                                                 Long newSize,
-                                                FileState fileState) {
+                                                UploadFileState fileState) {
         FileInfoEntity fileInfoEntity = fileInfoCacheService.getFileEntityByPath(path);
 
         fileInfoEntity.setFilePath(newPath);
@@ -102,7 +112,7 @@ public class FileStorageService {
                                                 String newPath,
                                                 Long newSize,
                                                 FolderEntity folderEntity,
-                                                FileState fileState) {
+                                                UploadFileState fileState) {
         FileInfoEntity fileInfoEntity = fileInfoCacheService.getFileEntityByPath(path);
 
         fileInfoEntity.setFilePath(newPath);

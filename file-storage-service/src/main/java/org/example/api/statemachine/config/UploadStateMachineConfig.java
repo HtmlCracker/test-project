@@ -1,8 +1,8 @@
 package org.example.api.statemachine.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.api.statemachine.enums.FileEvent;
-import org.example.api.statemachine.enums.FileState;
+import org.example.api.statemachine.state.upload.UploadFileEvent;
+import org.example.api.statemachine.state.upload.UploadFileState;
 import org.example.api.services.FileStorageService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,46 +16,46 @@ import java.util.EnumSet;
 
 @RequiredArgsConstructor
 @Configuration
-@EnableStateMachineFactory
-public class StateMachineConfig extends StateMachineConfigurerAdapter<FileState, FileEvent> {
+@EnableStateMachineFactory(name = "uploadStateMachineFactory")
+public class UploadStateMachineConfig extends StateMachineConfigurerAdapter<UploadFileState, UploadFileEvent> {
     private final FileStorageService fileStorageService;
 
     @Override
-    public void configure(StateMachineStateConfigurer<FileState, FileEvent> states) throws Exception {
+    public void configure(StateMachineStateConfigurer<UploadFileState, UploadFileEvent> states) throws Exception {
         states
                 .withStates()
-                .initial(FileState.UPLOADED)
-                .end(FileState.STORED)
-                .states(EnumSet.allOf(FileState.class));
+                .initial(UploadFileState.UPLOADED)
+                .end(UploadFileState.STORED)
+                .states(EnumSet.allOf(UploadFileState.class));
     }
 
     @Override
-    public void configure(StateMachineTransitionConfigurer<FileState, FileEvent> transitions)
+    public void configure(StateMachineTransitionConfigurer<UploadFileState, UploadFileEvent> transitions)
             throws Exception {
         transitions
                 .withExternal()
-                .source(FileState.UPLOADED)
-                .target(FileState.COMPRESSED)
-                .event(FileEvent.COMPRESS)
+                .source(UploadFileState.UPLOADED)
+                .target(UploadFileState.COMPRESSED)
+                .event(UploadFileEvent.COMPRESS)
                 .action(compressAction())
 
                 .and()
                 .withExternal()
-                .source(FileState.COMPRESSED)
-                .target(FileState.ENCRYPTED)
-                .event(FileEvent.ENCRYPT)
+                .source(UploadFileState.COMPRESSED)
+                .target(UploadFileState.ENCRYPTED)
+                .event(UploadFileEvent.ENCRYPT)
                 .action(encryptAction())
 
                 .and()
                 .withExternal()
-                .source(FileState.ENCRYPTED)
-                .target(FileState.STORED)
-                .event(FileEvent.STORE)
+                .source(UploadFileState.ENCRYPTED)
+                .target(UploadFileState.STORED)
+                .event(UploadFileEvent.STORE)
                 .action(storeAction());
     }
 
     @Bean
-    public Action<FileState, FileEvent> compressAction() {
+    public Action<UploadFileState, UploadFileEvent> compressAction() {
         return context -> {
             String fileId = (String) context.getExtendedState().getVariables().get("fileId");
             fileStorageService.compress(fileId);
@@ -63,7 +63,7 @@ public class StateMachineConfig extends StateMachineConfigurerAdapter<FileState,
     }
 
     @Bean
-    public Action<FileState, FileEvent> encryptAction() {
+    public Action<UploadFileState, UploadFileEvent> encryptAction() {
         return context -> {
             String fileId = (String) context.getExtendedState().getVariables().get("fileId");
             fileStorageService.encrypt(fileId);
@@ -71,7 +71,7 @@ public class StateMachineConfig extends StateMachineConfigurerAdapter<FileState,
     }
 
     @Bean
-    public Action<FileState, FileEvent> storeAction() {
+    public Action<UploadFileState, UploadFileEvent> storeAction() {
         return context -> {
             String fileId = (String) context.getExtendedState().getVariables().get("fileId");
             fileStorageService.store(fileId);

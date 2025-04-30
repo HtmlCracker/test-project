@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.api.dto.response.DeleteFileResponseDto;
+import org.example.api.dto.response.GetFileResponseDto;
 import org.example.api.dto.response.UploadFileResponseDto;
 import org.example.api.entities.FileInfoEntity;
 import org.example.api.exceptions.BadRequestException;
@@ -31,6 +32,7 @@ public class FileStorageController {
 
     public static final String UPLOAD_FILE = "api/private/file-storage/upload";
     public static final String DELETE_FILE = "api/private/file-storage/delete/{fileId}";
+    public static final String GET_FILE = "api/private/file-storage/get/{fileId}";
 
     @PostMapping(UPLOAD_FILE)
     public UploadFileResponseDto uploadFile(@RequestParam("file") MultipartFile file) {
@@ -38,7 +40,7 @@ public class FileStorageController {
             throw new BadRequestException("File can't be empty");
         }
         FileInfoEntity entity = temporaryStorageService.temporaryUploadFile(file);
-        fileProcessorService.processFile(entity.getId().toString());
+        fileProcessorService.uploadFile(entity.getId().toString());
         FileInfoEntity fileInfoEntity = fileInfoCacheService.getFileEntityById(entity.getId());
         return uploadFileResponseDtoFactory.makeUploadFileResponseDto(fileInfoEntity);
     }
@@ -46,5 +48,12 @@ public class FileStorageController {
     @DeleteMapping(DELETE_FILE)
     public DeleteFileResponseDto deleteFile(@PathVariable UUID fileId) {
         return fileStorageService.delete(fileId);
+    }
+
+    @GetMapping(GET_FILE)
+    public GetFileResponseDto getFile(@PathVariable UUID fileId) {
+        fileProcessorService.getFile(fileId.toString());
+        FileInfoEntity fileInfoEntity = fileInfoCacheService.getFileEntityById(fileId);
+        return GetFileResponseDto.builder().build();
     }
 }

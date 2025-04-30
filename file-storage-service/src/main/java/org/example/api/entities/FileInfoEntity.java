@@ -18,7 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
-import org.example.api.statemachine.enums.FileState;
+import org.example.api.statemachine.state.upload.UploadFileState;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -48,12 +48,15 @@ public class FileInfoEntity {
     @Column(nullable = false)
     String filePath;
 
+    @Column(nullable = true)
+    String downloadPath;
+
     @Column(nullable = false)
     String fileExt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    FileState fileState;
+    UploadFileState fileState;
 
     @Column(nullable = false)
     @Builder.Default

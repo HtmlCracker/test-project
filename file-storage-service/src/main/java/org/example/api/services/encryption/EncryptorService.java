@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.InputStream;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
@@ -28,18 +27,29 @@ public class EncryptorService {
     public EncryptedFileDto encryptFileAndWrite(String path) {
         File file = fileUtils.getFileOrThrowException(path);
         byte[] encryptedByte = encryptionUtils.encrypt(encryptionKey, file);
-        String pathToCompressedFile = writeFile(encryptedByte, path);
+        String pathToEncryptedFile = writeEncryptedFile(encryptedByte, path);
 
         return EncryptedFileDto.builder()
-                .path(pathToCompressedFile)
+                .path(pathToEncryptedFile)
                 .encryptedSize((long) encryptedByte.length)
                 .build();
     }
 
-    private String writeFile(byte[] compressedByte,
+    public void decryptFileAndWrite(String path) {
+        File file = fileUtils.getFileOrThrowException(path);
+        byte[] decryptedByte = encryptionUtils.decrypt(encryptionKey, file);
+        writeDecryptedFile(decryptedByte, path);
+    }
+
+    private String writeEncryptedFile(byte[] compressedByte,
                              String oldPath) {
         String fileName = fileUtils.getFileName(oldPath);
-
         return fileUtils.createFileInDir(fileName, compressedByte, encryptedStoragePath);
+    }
+
+    private String writeDecryptedFile(byte[] compressedByte,
+                                      String path) {
+        String fileName = fileUtils.getFileName(path);
+        return fileUtils.createFileInDir(fileName, compressedByte, path);
     }
 }
