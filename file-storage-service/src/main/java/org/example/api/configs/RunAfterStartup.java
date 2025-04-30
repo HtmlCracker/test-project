@@ -27,11 +27,30 @@ public class RunAfterStartup {
     @Value("${PATH_TO_PERMANENT_STORAGE}")
     private String permanentStoragePath;
 
+    @Value("${PATH_TO_PREPARED_FOR_GET_STORAGE}")
+    private String preparedForGetStoragePath;
+
+    @Value("${PATH_TO_DECRYPTED_STORAGE}")
+    private String decryptedStorage;
+
+    @Value("${PATH_TO_DECOMPRESSED_STORAGE}")
+    private String decompressedStorage;
+
+    @Value("${PATH_TO_READY_FOR_GET_STORAGE}")
+    private String readyForGetStoragePath;
+
     @EventListener(ApplicationReadyEvent.class)
     public void runAfterStartup() {
         fileUtils.createDirectoryIfNotExists(temporaryStoragePath);
         fileUtils.createDirectoryIfNotExists(compressedStoragePath);
         fileUtils.createDirectoryIfNotExists(encryptedStoragePath);
         fileUtils.createDirectoryIfNotExists(permanentStoragePath);
+
+        fileUtils.createDirectoryIfNotExists(preparedForGetStoragePath);
+        fileUtils.createDirectoryIfNotExists(decryptedStorage);
+        fileUtils.createDirectoryIfNotExists(decompressedStorage);
+        fileUtils.createDirectoryIfNotExists(readyForGetStoragePath);
+
+        System.out.println("CREATED");
     }
 }

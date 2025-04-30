@@ -10,7 +10,6 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${PATH_TO_PERMANENT_STORAGE}")
     String storagePath;
     private final FolderService folderService;
-
     public StartupRunner(FolderService folderService) {
         this.folderService = folderService;
     }

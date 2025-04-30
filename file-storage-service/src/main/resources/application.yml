@@ -3,10 +3,15 @@ server:
 
 ENCRYPTION_KEY: ${ENCRYPTION_KEY}
 
-PATH_TO_TEMPORARY_STORAGE: /files/temporary-storage
-PATH_TO_COMPRESSED_STORAGE: /files/compressed-storage
-PATH_TO_ENCRYPTED_STORAGE: /files/encrypted-storage
-PATH_TO_PERMANENT_STORAGE: /files/permanent-storage
+PATH_TO_TEMPORARY_STORAGE: /files/upload/temporary-storage
+PATH_TO_COMPRESSED_STORAGE: /files/upload/compressed-storage
+PATH_TO_ENCRYPTED_STORAGE: /files/upload/encrypted-storage
+PATH_TO_PERMANENT_STORAGE: /files/upload/permanent-storage
+
+PATH_TO_PREPARED_FOR_GET_STORAGE: /files/get/prepare-for-get-storage
+PATH_TO_DECRYPTED_STORAGE: /files/get/decrypted-storage
+PATH_TO_DECOMPRESSED_STORAGE: /files/get/decompressed-storage
+PATH_TO_READY_FOR_GET_STORAGE: /files/get/ready-for-get-storage
 
 compression:
   text-type: text
