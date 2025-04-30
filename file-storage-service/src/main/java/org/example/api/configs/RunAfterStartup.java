@@ -2,6 +2,7 @@ package org.example.api.configs;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.example.api.services.storage.FolderService;
 import org.example.api.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,9 @@ import org.springframework.stereotype.Component;
 public class RunAfterStartup {
     @Autowired
     FileUtils fileUtils;
+
+    @Autowired
+    private FolderService folderService;
 
     @Value("${PATH_TO_TEMPORARY_STORAGE}")
     private String temporaryStoragePath;
@@ -44,7 +48,7 @@ public class RunAfterStartup {
         fileUtils.createDirectoryIfNotExists(temporaryStoragePath);
         fileUtils.createDirectoryIfNotExists(compressedStoragePath);
         fileUtils.createDirectoryIfNotExists(encryptedStoragePath);
-        fileUtils.createDirectoryIfNotExists(permanentStoragePath);
+        folderService.createRootIfNotExists(permanentStoragePath);
 
         fileUtils.createDirectoryIfNotExists(preparedForGetStoragePath);
         fileUtils.createDirectoryIfNotExists(decryptedStorage);
