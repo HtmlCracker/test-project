@@ -23,7 +23,8 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
     private final FileStorageService fileStorageService;
 
     @Override
-    public void configure(StateMachineStateConfigurer<DownloadFileState, DownloadFileEvent> states) throws Exception {
+    public void configure(StateMachineStateConfigurer<DownloadFileState, DownloadFileEvent> states)
+            throws Exception {
         states
                 .withStates()
                 .initial(DownloadFileState.STORED)
@@ -37,6 +38,13 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
         transitions
                 .withExternal()
                 .source(DownloadFileState.STORED)
+                .target(DownloadFileState.PREPARED)
+                .event(DownloadFileEvent.PREPARE)
+                .action(prepareAction())
+
+                .and()
+                .withExternal()
+                .source(DownloadFileState.PREPARED)
                 .target(DownloadFileState.DECRYPTED)
                 .event(DownloadFileEvent.DECRYPT)
                 .action(decryptAction())
@@ -54,6 +62,13 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
                 .target(DownloadFileState.READY)
                 .event(DownloadFileEvent.DELIVER)
                 .action(deliverAction());
+    }
+
+    @Bean
+    public Action<DownloadFileState, DownloadFileEvent> prepareAction() {
+        return context -> {
+            String filePath = (String) context.getExtendedState().getVariables().get("filePath");
+        };
     }
 
     @Bean
