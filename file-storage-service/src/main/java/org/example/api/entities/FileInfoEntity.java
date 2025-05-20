@@ -48,9 +48,6 @@ public class FileInfoEntity {
     @Column(nullable = false)
     String filePath;
 
-    @Column(nullable = true)
-    String downloadPath;
-
     @Column(nullable = false)
     String fileExt;
 

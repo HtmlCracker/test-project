@@ -1,11 +1,9 @@
 package org.example.api.statemachine.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.api.services.FileStorageService;
+import org.example.api.services.FileOperationService;
 import org.example.api.statemachine.state.download.DownloadFileEvent;
 import org.example.api.statemachine.state.download.DownloadFileState;
-import org.example.api.statemachine.state.upload.UploadFileEvent;
-import org.example.api.statemachine.state.upload.UploadFileState;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
@@ -20,7 +18,7 @@ import java.util.EnumSet;
 @Configuration
 @EnableStateMachineFactory(name = "downloadStateMachineFactory")
 public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<DownloadFileState, DownloadFileEvent> {
-    private final FileStorageService fileStorageService;
+    private final FileOperationService fileStorageService;
 
     @Override
     public void configure(StateMachineStateConfigurer<DownloadFileState, DownloadFileEvent> states)
@@ -28,7 +26,7 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
         states
                 .withStates()
                 .initial(DownloadFileState.STORED)
-                .end(DownloadFileState.DECOMPRESSED)
+                .end(DownloadFileState.READY)
                 .states(EnumSet.allOf(DownloadFileState.class));
     }
 
@@ -68,6 +66,8 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
     public Action<DownloadFileState, DownloadFileEvent> prepareAction() {
         return context -> {
             String filePath = (String) context.getExtendedState().getVariables().get("filePath");
+            String newPath = fileStorageService.prepare(filePath);
+            context.getExtendedState().getVariables().put("filePath", newPath);
         };
     }
 
@@ -75,7 +75,8 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
     public Action<DownloadFileState, DownloadFileEvent> decryptAction() {
         return context -> {
             String filePath = (String) context.getExtendedState().getVariables().get("filePath");
-            fileStorageService.decrypt(filePath);
+            String newPath = fileStorageService.decrypt(filePath);
+            context.getExtendedState().getVariables().put("filePath", newPath);
         };
     }
 
@@ -83,7 +84,9 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
     public Action<DownloadFileState, DownloadFileEvent> decompressAction() {
         return context -> {
             String filePath = (String) context.getExtendedState().getVariables().get("filePath");
-            fileStorageService.compress(filePath);
+            String newPath = fileStorageService.decompress(filePath);
+            System.out.println(newPath + " DECOMPRESSED");
+            context.getExtendedState().getVariables().put("filePath", newPath);
         };
     }
 
@@ -91,7 +94,9 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
     public Action<DownloadFileState, DownloadFileEvent> deliverAction() {
         return context -> {
             String filePath = (String) context.getExtendedState().getVariables().get("filePath");
-            fileStorageService.encrypt(filePath);
+            String newPath = fileStorageService.deliver(filePath);
+            System.out.println(newPath + " DELIVERED");
+            context.getExtendedState().getVariables().put("filePath", newPath);
         };
     }
 }

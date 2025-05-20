@@ -3,6 +3,7 @@ package org.example.api.services;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.example.api.dto.response.DeleteFileResponseDto;
 import org.example.api.dto.service.CompressedFileDto;
 import org.example.api.dto.service.EncryptedFileDto;
@@ -16,8 +17,8 @@ import org.example.api.services.compression.CompressorService;
 import org.example.api.services.encryption.EncryptorService;
 import org.example.api.services.storage.PermanentStorageService;
 import org.example.api.statemachine.state.upload.UploadFileState;
-import org.example.api.utils.EncryptionUtils;
 import org.example.api.utils.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.statemachine.annotation.WithStateMachine;
 import org.springframework.stereotype.Service;
 
@@ -27,13 +28,21 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @WithStateMachine
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class FileStorageService {
+public class FileOperationService {
     FileInfoCacheService fileInfoCacheService;
     FileInfoRepository fileInfoRepository;
     FolderRepository folderRepository;
     CompressorService compressorService;
     EncryptorService encryptorService;
     PermanentStorageService permanentStorageService;
+
+    @NonFinal
+    @Value("${PATH_TO_PREPARED_FOR_GET_STORAGE}")
+    private String preparedForGetStoragePath;
+
+    @NonFinal
+    @Value("${PATH_TO_READY_FOR_GET_STORAGE}")
+    private String pathToReadyForGetStorage;
 
     FileUtils fileUtils;
 
@@ -88,12 +97,31 @@ public class FileStorageService {
                 .build();
     }
 
-    public void decrypt(String path) {
-        encryptorService.decryptFileAndWrite(path);
+    public String prepare(String path) {
+        String fileName = fileUtils.getFileName(path);
+        return fileUtils.moveFileTo(path, preparedForGetStoragePath + "/" + fileName);
     }
 
-    public void decompress() {
+    public String decrypt(String path) {
+        String newPath = encryptorService.decryptFileAndWrite(path);
 
+        deleteSourceAfterProcessing(path);
+        return newPath;
+    }
+
+    public String decompress(String path) {
+        String newPath = compressorService.decompressFileAndWrite(path);
+
+        deleteSourceAfterProcessing(path);
+        return newPath;
+    }
+
+    public String deliver(String path) {
+        String fileName = fileUtils.getFileName(path);
+        String newPath = fileUtils.moveFileTo(path, pathToReadyForGetStorage + "/" + fileName);
+
+        deleteSourceAfterProcessing(path);
+        return newPath;
     }
 
     private FileInfoEntity updateFileInfoEntity(String path,

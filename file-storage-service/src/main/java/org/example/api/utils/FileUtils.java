@@ -8,9 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -39,13 +37,26 @@ public class FileUtils {
         createDirectoryIfNotExists(pathToDir);
 
         Path filePath = Paths.get(pathToDir, fileName);
-        File dest = new File(filePath.toString());
 
         try {
             Files.write(filePath, fileInByte);
             return filePath.toString();
         } catch (IOException e) {
             throw new BadRequestException("Save file error");
+        }
+    }
+
+    public String moveFileTo(String sourcePath, String destinationPath) {
+        try {
+            Path source = Paths.get(sourcePath);
+            Path destination = Paths.get(destinationPath);
+
+            Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
+            return destination.toAbsolutePath().toString();
+        } catch (FileAlreadyExistsException e) {
+            throw new FileProcessingException("File already exists");
+        } catch (IOException e) {
+            throw new FileProcessingException("IOException");
         }
     }
 
@@ -106,7 +117,7 @@ public class FileUtils {
             String mimeType = Files.probeContentType(file.toPath());
 
             if (mimeType == null) {
-                return "unknown";
+                return "unknown mime type";
             }
 
             return mimeType.split("/")[0];

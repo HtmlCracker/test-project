@@ -24,6 +24,9 @@ public class EncryptorService {
     @Value("${PATH_TO_ENCRYPTED_STORAGE}")
     String encryptedStoragePath;
 
+    @Value("${PATH_TO_DECRYPTED_STORAGE}")
+    private String decryptedStoragePath;
+
     public EncryptedFileDto encryptFileAndWrite(String path) {
         File file = fileUtils.getFileOrThrowException(path);
         byte[] encryptedByte = encryptionUtils.encrypt(encryptionKey, file);
@@ -35,10 +38,11 @@ public class EncryptorService {
                 .build();
     }
 
-    public void decryptFileAndWrite(String path) {
+    public String decryptFileAndWrite(String path) {
         File file = fileUtils.getFileOrThrowException(path);
         byte[] decryptedByte = encryptionUtils.decrypt(encryptionKey, file);
-        writeDecryptedFile(decryptedByte, path);
+        System.out.println(decryptedByte.length);
+        return writeDecryptedFile(decryptedByte, path);
     }
 
     private String writeEncryptedFile(byte[] compressedByte,
@@ -48,8 +52,8 @@ public class EncryptorService {
     }
 
     private String writeDecryptedFile(byte[] compressedByte,
-                                      String path) {
-        String fileName = fileUtils.getFileName(path);
-        return fileUtils.createFileInDir(fileName, compressedByte, path);
+                                      String oldPath) {
+        String fileName = fileUtils.getFileName(oldPath);
+        return fileUtils.createFileInDir(fileName, compressedByte, decryptedStoragePath);
     }
 }
