@@ -1,9 +1,10 @@
 package org.example.api.statemachine.config;
 
 import lombok.RequiredArgsConstructor;
+import org.example.api.repositories.FileInfoRepository;
+import org.example.api.services.FileOperationService;
 import org.example.api.statemachine.state.upload.UploadFileEvent;
 import org.example.api.statemachine.state.upload.UploadFileState;
-import org.example.api.services.FileOperationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
@@ -19,6 +20,7 @@ import java.util.EnumSet;
 @EnableStateMachineFactory(name = "uploadStateMachineFactory")
 public class UploadStateMachineConfig extends StateMachineConfigurerAdapter<UploadFileState, UploadFileEvent> {
     private final FileOperationService fileStorageService;
+    private final FileInfoRepository d;
 
     @Override
     public void configure(StateMachineStateConfigurer<UploadFileState, UploadFileEvent> states) throws Exception {
@@ -67,6 +69,11 @@ public class UploadStateMachineConfig extends StateMachineConfigurerAdapter<Uplo
         return context -> {
             String fileId = (String) context.getExtendedState().getVariables().get("fileId");
             fileStorageService.encrypt(fileId);
+            try {
+                Thread.sleep(100000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         };
     }
 

@@ -21,6 +21,7 @@ import org.example.api.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.statemachine.annotation.WithStateMachine;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -46,6 +47,7 @@ public class FileOperationService {
 
     FileUtils fileUtils;
 
+    @Transactional
     public void compress(String id) {
         UUID fileId = UUID.fromString(id);
         FileInfoEntity entity = fileInfoCacheService.getFileEntityById(fileId);
@@ -57,6 +59,7 @@ public class FileOperationService {
         updateFileInfoEntity(path, newPath, dto.getCompressedSize(), UploadFileState.COMPRESSED);
     }
 
+    @Transactional
     public void encrypt(String id) {
         UUID fileId = UUID.fromString(id);
         FileInfoEntity entity = fileInfoCacheService.getFileEntityById(fileId);
@@ -68,6 +71,7 @@ public class FileOperationService {
         updateFileInfoEntity(path, newPath, dto.getEncryptedSize(), UploadFileState.ENCRYPTED);
     }
 
+    @Transactional
     public void store(String id) {
         UUID fileId = UUID.fromString(id);
         FileInfoEntity entity = fileInfoCacheService.getFileEntityById(fileId);

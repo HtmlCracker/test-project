@@ -20,14 +20,16 @@ import java.util.UUID;
 public class FileInfoCacheService {
     FileInfoRepository fileInfoRepository;
 
-    @Caching(
+    /*@Caching(
             put = {
                     @CachePut(value = "fileInfoCacheById", key = "#entity.id"),
                     @CachePut(value = "fileInfoCacheByPath", key = "#entity.filePath")
             }
-    )
+    )*/
     public FileInfoEntity saveFileInfoEntity(FileInfoEntity entity) {
-        return fileInfoRepository.save(entity);
+        entity = fileInfoRepository.saveAndFlush(entity);
+        System.out.println(entity.getFileState());
+        return entity;
     }
 
     @Cacheable(value = "fileInfoCacheById", key = "#id")

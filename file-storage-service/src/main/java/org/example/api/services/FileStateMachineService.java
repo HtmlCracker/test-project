@@ -18,6 +18,34 @@ public class FileStateMachineService {
     StateMachineFactory<UploadFileState, UploadFileEvent> uploadStateMachineFactory;
     StateMachineFactory<DownloadFileState, DownloadFileEvent> downloadStateMachineFactory;
 
+    public void resortingUploadState(String fileId, UploadFileState currentState) {
+        StateMachine<UploadFileState, UploadFileEvent> stateMachine =
+                uploadStateMachineFactory.getStateMachine();
+
+        stateMachine.getExtendedState().getVariables().put("fileId", fileId);
+        stateMachine.start();
+
+        try {
+            UploadFileState state = currentState;
+            while (state != null && state.isBefore(UploadFileState.STORED)) {
+                UploadFileEvent event = getEventForState(state);
+                stateMachine.sendEvent(event);
+                state = state.next();
+            }
+        } finally {
+            stateMachine.stop();
+        }
+    }
+
+    private UploadFileEvent getEventForState(UploadFileState state) {
+        switch (state) {
+            case UPLOADED: return UploadFileEvent.COMPRESS;
+            case COMPRESSED: return UploadFileEvent.ENCRYPT;
+            case ENCRYPTED: return UploadFileEvent.STORE;
+            default: throw new IllegalStateException();
+        }
+    }
+
     public void uploadFile(String fileId) {
         StateMachine<UploadFileState, UploadFileEvent> stateMachine =
                 uploadStateMachineFactory.getStateMachine();

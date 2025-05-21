@@ -2,6 +2,7 @@ package org.example.api.configs;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.example.api.services.ResortingStateService;
 import org.example.api.services.storage.FolderService;
 import org.example.api.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,9 @@ import org.springframework.stereotype.Component;
 public class RunAfterStartup {
     @Autowired
     FileUtils fileUtils;
+
+    @Autowired
+    ResortingStateService resortingStateService;
 
     @Autowired
     private FolderService folderService;
@@ -54,7 +58,11 @@ public class RunAfterStartup {
         fileUtils.createDirectoryIfNotExists(decryptedStorage);
         fileUtils.createDirectoryIfNotExists(decompressedStorage);
         fileUtils.createDirectoryIfNotExists(readyForGetStoragePath);
+    }
 
-        System.out.println("CREATED");
+    @EventListener(ApplicationReadyEvent.class)
+    public void restoringStates() {
+        System.out.println("restoringStates --------------------");
+        resortingStateService.resortStates();
     }
 }
