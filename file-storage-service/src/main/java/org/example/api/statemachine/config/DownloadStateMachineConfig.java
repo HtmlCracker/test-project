@@ -37,21 +37,18 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
                 .withExternal()
                 .source(DownloadFileState.STORED)
                 .target(DownloadFileState.PREPARED)
-                .event(DownloadFileEvent.PREPARE)
                 .action(prepareAction())
 
                 .and()
                 .withExternal()
                 .source(DownloadFileState.PREPARED)
                 .target(DownloadFileState.DECRYPTED)
-                .event(DownloadFileEvent.DECRYPT)
                 .action(decryptAction())
 
                 .and()
                 .withExternal()
                 .source(DownloadFileState.DECRYPTED)
                 .target(DownloadFileState.DECOMPRESSED)
-                .event(DownloadFileEvent.DECOMPRESS)
                 .action(decompressAction())
 
                 .and()

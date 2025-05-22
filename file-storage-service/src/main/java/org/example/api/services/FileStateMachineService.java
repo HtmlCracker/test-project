@@ -53,10 +53,6 @@ public class FileStateMachineService {
         stateMachine.getExtendedState().getVariables().put("fileId", fileId);
 
         stateMachine.start();
-        stateMachine.sendEvent(UploadFileEvent.COMPRESS);
-        stateMachine.sendEvent(UploadFileEvent.ENCRYPT);
-        stateMachine.sendEvent(UploadFileEvent.STORE);
-        stateMachine.stop();
     }
 
     public String getFile(String filePath) {
@@ -66,11 +62,6 @@ public class FileStateMachineService {
         stateMachine.getExtendedState().getVariables().put("filePath", filePath);
 
         stateMachine.start();
-        stateMachine.sendEvent(DownloadFileEvent.PREPARE);
-        stateMachine.sendEvent(DownloadFileEvent.DECRYPT);
-        stateMachine.sendEvent(DownloadFileEvent.DECOMPRESS);
-        stateMachine.sendEvent(DownloadFileEvent.DELIVER);
-        stateMachine.stop();
 
         return (String) stateMachine.getExtendedState().getVariables().get("filePath");
     }
