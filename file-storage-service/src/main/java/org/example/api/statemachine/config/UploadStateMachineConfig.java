@@ -38,18 +38,21 @@ public class UploadStateMachineConfig extends StateMachineConfigurerAdapter<Uplo
                 .withExternal()
                 .source(UploadFileState.UPLOADED)
                 .target(UploadFileState.COMPRESSED)
+                .event(UploadFileEvent.COMPRESS)
                 .action(compressAction())
 
                 .and()
                 .withExternal()
                 .source(UploadFileState.COMPRESSED)
                 .target(UploadFileState.ENCRYPTED)
+                .event(UploadFileEvent.ENCRYPT)
                 .action(encryptAction())
 
                 .and()
                 .withExternal()
                 .source(UploadFileState.ENCRYPTED)
                 .target(UploadFileState.STORED)
+                .event(UploadFileEvent.STORE)
                 .action(storeAction());
     }
 
