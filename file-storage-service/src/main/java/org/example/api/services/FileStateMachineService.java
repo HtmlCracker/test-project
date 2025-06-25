@@ -7,8 +7,11 @@ import org.example.api.statemachine.state.download.DownloadFileEvent;
 import org.example.api.statemachine.state.download.DownloadFileState;
 import org.example.api.statemachine.state.upload.UploadFileEvent;
 import org.example.api.statemachine.state.upload.UploadFileState;
+import org.springframework.statemachine.ExtendedState;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineFactory;
+import org.springframework.statemachine.support.DefaultExtendedState;
+import org.springframework.statemachine.support.DefaultStateMachineContext;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,8 +29,25 @@ public class FileStateMachineService {
         stateMachine.start();
 
         try {
+            if (currentState == UploadFileState.STORED) {
+                return;
+            }
+
+            stateMachine.getStateMachineAccessor()
+                    .doWithAllRegions(access -> {
+                        ExtendedState extendedState = new DefaultExtendedState();
+                        extendedState.getVariables().put("fileId", fileId);
+
+                        access.resetStateMachine(new DefaultStateMachineContext<>(
+                                currentState,
+                                null,
+                                null,
+                                extendedState
+                        ));
+                    });
+
             UploadFileState state = currentState;
-            while (state != null && state.isBefore(UploadFileState.STORED)) {
+            while (state != null && state != UploadFileState.STORED) {
                 UploadFileEvent event = getEventForState(state);
                 stateMachine.sendEvent(event);
                 state = state.next();
@@ -53,6 +73,10 @@ public class FileStateMachineService {
         stateMachine.getExtendedState().getVariables().put("fileId", fileId);
 
         stateMachine.start();
+        stateMachine.sendEvent(UploadFileEvent.COMPRESS);
+        stateMachine.sendEvent(UploadFileEvent.ENCRYPT);
+        stateMachine.sendEvent(UploadFileEvent.STORE);
+        stateMachine.stop();
     }
 
     public String getFile(String filePath) {
