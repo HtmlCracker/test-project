@@ -22,7 +22,6 @@ public class PermanentStorageService {
 
     public StoredFileDto permanentUploadFile(String path) {
         FolderEntity folder = folderService.getLeastFilledFolder();
-        System.out.println(folder.getPath());
         String folderPath = folder.getPath();
 
         String fileName = fileUtils.getFileName(path);
