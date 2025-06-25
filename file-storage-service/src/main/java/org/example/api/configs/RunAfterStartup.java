@@ -62,7 +62,6 @@ public class RunAfterStartup {
 
     @EventListener(ApplicationReadyEvent.class)
     public void restoringStates() {
-        System.out.println("restoringStates --------------------");
         resortingStateService.resortStates();
     }
 }
