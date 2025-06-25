@@ -28,7 +28,6 @@ public class FileInfoCacheService {
     )
     public FileInfoEntity saveFileInfoEntity(FileInfoEntity entity) {
         entity = fileInfoRepository.saveAndFlush(entity);
-        System.out.println(entity.getFileState());
         return entity;
     }
 
