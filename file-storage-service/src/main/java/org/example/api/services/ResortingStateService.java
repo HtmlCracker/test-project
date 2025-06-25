@@ -19,7 +19,6 @@ public class ResortingStateService {
 
     public void resortStates() {
         List<FileInfoEntity> entities = getEntitiesWitResortState();
-        System.out.println("SIZE: " + entities.size());
         for (FileInfoEntity entity : entities) {
             fileStateMachineService.resortingUploadState(
                     entity.getId().toString(), entity.getFileState()
@@ -33,7 +32,6 @@ public class ResortingStateService {
                         UploadFileState.COMPRESSED,
                         UploadFileState.ENCRYPTED)
         );
-        System.out.println("Monkey: " + entities.size());
         return entities;
     }
 }
