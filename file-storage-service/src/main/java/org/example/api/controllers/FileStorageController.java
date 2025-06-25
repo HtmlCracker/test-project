@@ -53,7 +53,6 @@ public class FileStorageController {
     public static final String GET_FILE = "api/private/file-storage/get/{fileId}";
     public static final String TEST = "api/private/file-storage/test";
 
-    @Transactional
     @PostMapping(UPLOAD_FILE)
     public UploadFileResponseDto uploadFile(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
