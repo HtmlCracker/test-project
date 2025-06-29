@@ -4,10 +4,7 @@ import org.example.api.exceptions.CryptoException;
 import org.example.api.exceptions.FileProcessingException;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.security.InvalidKeyException;
@@ -19,27 +16,34 @@ public class EncryptionUtils {
     private static final String ALGORITHM = "AES";
     private static final String TRANSFORMATION = "AES";
 
-    public byte[] encrypt(String key, File inputFile)
+    public long encrypt(String key, File inputFile, File outputFile)
             throws CryptoException {
-        return doCrypto(Cipher.ENCRYPT_MODE, key, inputFile);
+        return doCrypto(Cipher.ENCRYPT_MODE, key, inputFile, outputFile);
     }
 
-    public byte[] decrypt(String key, File inputFile)
+    public long decrypt(String key, File inputFile, File outputFile)
             throws CryptoException {
-        return doCrypto(Cipher.DECRYPT_MODE, key, inputFile);
+        return doCrypto(Cipher.DECRYPT_MODE, key, inputFile, outputFile);
     }
 
-    private byte[] doCrypto(int cipherMode, String key, File inputFile) {
-        byte[] inputBytes;
+    private long doCrypto(int cipherMode, String key, File inputFile, File outputFile) {
+        try (FileInputStream inputStream = new FileInputStream(inputFile);
+             FileOutputStream outputStream = new FileOutputStream(outputFile)) {
 
-        try (FileInputStream inputStream = new FileInputStream(inputFile);) {
-            inputBytes = new byte[(int) inputFile.length()];
-            inputStream.read(inputBytes);
-        } catch (IOException e) {
-            throw new FileProcessingException("File stream exception");
+            Cipher cipher = initCipher(cipherMode, key);
+
+            try (CipherOutputStream cipherOutputStream = new CipherOutputStream(outputStream, cipher)) {
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    cipherOutputStream.write(buffer, 0, bytesRead);
+                }
+            }
+            return outputFile.length();
+        } catch (IOException | SecurityException e) {
+            throw new FileProcessingException("File processing error");
         }
-
-        return cryptoInputBytes(cipherMode, key, inputBytes);
     }
 
     private byte[] cryptoInputBytes(int cipherMode, String key, byte[] inputBytes) {
@@ -60,4 +64,15 @@ public class EncryptionUtils {
         return outputBytes;
     }
 
+    private Cipher initCipher(int cipherMode, String key) {
+        Cipher cipher;
+        try {
+            cipher = Cipher.getInstance(TRANSFORMATION);
+            Key secretKey = new SecretKeySpec(key.getBytes(), ALGORITHM);
+            cipher.init(cipherMode, secretKey);
+        } catch (Exception e) {
+            throw new FileProcessingException("Cipher ERROR");
+        }
+        return cipher;
+    }
 }

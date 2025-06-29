@@ -29,20 +29,24 @@ public class EncryptorService {
 
     public EncryptedFileDto encryptFileAndWrite(String path) {
         File file = fileUtils.getFileOrThrowException(path);
-        byte[] encryptedByte = encryptionUtils.encrypt(encryptionKey, file);
-        String pathToEncryptedFile = writeEncryptedFile(encryptedByte, path);
+        String fileName = fileUtils.getFileName(path);
+        File encryptedFile = new File(encryptedStoragePath, fileName);
+
+        long size = encryptionUtils.encrypt(encryptionKey, file, encryptedFile);
 
         return EncryptedFileDto.builder()
-                .path(pathToEncryptedFile)
-                .encryptedSize((long) encryptedByte.length)
+                .path(encryptedFile.getPath())
+                .encryptedSize(size)
                 .build();
     }
 
     public String decryptFileAndWrite(String path) {
         File file = fileUtils.getFileOrThrowException(path);
-        byte[] decryptedByte = encryptionUtils.decrypt(encryptionKey, file);
-        System.out.println(decryptedByte.length);
-        return writeDecryptedFile(decryptedByte, path);
+        String fileName = fileUtils.getFileName(path);
+        File encryptedFile = new File(encryptedStoragePath, fileName);
+        long size = encryptionUtils.decrypt(encryptionKey, file, encryptedFile);
+
+        return encryptedFile.getPath();
     }
 
     private String writeEncryptedFile(byte[] compressedByte,
