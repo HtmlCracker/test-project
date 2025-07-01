@@ -1,0 +1,52 @@
+server:
+  port: 45295
+
+ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+
+PATH_TO_TEMPORARY_STORAGE: /files/upload/temporary-storage
+PATH_TO_COMPRESSED_STORAGE: /files/upload/compressed-storage
+PATH_TO_ENCRYPTED_STORAGE: /files/upload/encrypted-storage
+PATH_TO_PERMANENT_STORAGE: /files/upload/permanent-storage
+
+PATH_TO_PREPARED_FOR_GET_STORAGE: /files/get/prepare-for-get-storage
+PATH_TO_DECRYPTED_STORAGE: /files/get/decrypted-storage
+PATH_TO_DECOMPRESSED_STORAGE: /files/get/decompressed-storage
+PATH_TO_READY_FOR_GET_STORAGE: /files/get/ready-for-get-storage
+
+compression:
+  text-type: text
+
+  binary-type: application
+
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000, expireAfterWrite=10m
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 300MB
+      max-request-size: 315MB
+
+  application:
+    name: file-storage-service
+
+  datasource:
+    url: jdbc:postgresql://fileStorageDb:5432/fileStorageDb
+    username: ${USERNAME}
+    password: ${PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+
+  cloud:
+    consul:
+      host: http://consul
+      port: 8500

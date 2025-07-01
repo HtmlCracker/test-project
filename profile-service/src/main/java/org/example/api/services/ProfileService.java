@@ -77,7 +77,6 @@ public class ProfileService {
         return profileEntity;
     }
 
-
     public DelProfileResponseDto delProfile(UUID profileId) {
         ProfileEntity profile = getProfileByIdOrThrowException(profileId);
 
@@ -87,5 +86,4 @@ public class ProfileService {
                 .status("The profile has been deleted.")
                 .build();
     }
-
 }

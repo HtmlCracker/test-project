@@ -36,7 +36,7 @@ public class EmailSenderService {
     TemplateEngine templateEngine;
 
     @Value("${spring.mail.username}")
-    final String EMAIL_USERNAME;
+    String EMAIL_USERNAME;
 
     @Async
     @Retryable(
