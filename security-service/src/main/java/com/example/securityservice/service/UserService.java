@@ -56,7 +56,6 @@ public class UserService {
                 passwordEncoder.encode(userRequestDto.getPassword()),
                 LocalDateTime.now(),
                 false);
-        //TODO отправка email с кодом
         emailVerifyService.sendVerifyToken(userRequestDto.getEmail());
         userRepository.save(user);
         return "User has been registered";
