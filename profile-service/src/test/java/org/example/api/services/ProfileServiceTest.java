@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,6 +38,7 @@ public class ProfileServiceTest {
         ProfileRegistrationRequestDto dto = ProfileRegistrationRequestDto.builder()
                 .email("test@test.test")
                 .name("test")
+                .roles("test")
                 .build();
 
         ProfileEntity profile = ProfileEntity.builder().build();
@@ -51,15 +53,19 @@ public class ProfileServiceTest {
     void registerProfile_shouldReturnProfileEntity() {
         UUID id = UUID.randomUUID();
 
+        List<String> roles = List.of("ROLE_USER", "ROLE_ADMIN");
+
         ProfileRegistrationRequestDto dto = ProfileRegistrationRequestDto.builder()
                 .email("test@test.test")
                 .name("test")
+                .roles("ROLE_USER,ROLE_ADMIN")
                 .build();
 
         ProfileEntity profile = ProfileEntity.builder()
                 .id(id)
                 .email(dto.getEmail())
                 .name(dto.getName())
+                .roles(roles)
                 .build();
 
         when(profileRepository.findByEmail(dto.getEmail()))
@@ -76,6 +82,7 @@ public class ProfileServiceTest {
         ProfileUpdateRequestDto dto = ProfileUpdateRequestDto.builder()
                 .email("test@test.test")
                 .name("test")
+                .roles("test")
                 .build();
 
         when(profileRepository.findById(id))
