@@ -43,21 +43,9 @@ public class EncryptorService {
     public String decryptFileAndWrite(String path) {
         File file = fileUtils.getFileOrThrowException(path);
         String fileName = fileUtils.getFileName(path);
-        File encryptedFile = new File(encryptedStoragePath, fileName);
+        File encryptedFile = new File(decryptedStoragePath, fileName);
         long size = encryptionUtils.decrypt(encryptionKey, file, encryptedFile);
 
         return encryptedFile.getPath();
-    }
-
-    private String writeEncryptedFile(byte[] compressedByte,
-                             String oldPath) {
-        String fileName = fileUtils.getFileName(oldPath);
-        return fileUtils.createFileInDir(fileName, compressedByte, encryptedStoragePath);
-    }
-
-    private String writeDecryptedFile(byte[] compressedByte,
-                                      String oldPath) {
-        String fileName = fileUtils.getFileName(oldPath);
-        return fileUtils.createFileInDir(fileName, compressedByte, decryptedStoragePath);
     }
 }
