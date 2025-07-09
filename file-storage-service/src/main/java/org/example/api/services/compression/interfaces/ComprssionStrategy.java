@@ -1,11 +1,12 @@
 package org.example.api.services.compression.interfaces;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public interface ComprssionStrategy {
-    byte[] compress(InputStream inputStream);
+    void compress(InputStream inputStream, OutputStream outputStream);
 
-    byte[] deсompress(InputStream inputStream);
+    void decompress(InputStream inputStream, OutputStream fileOutputStream);
 
     String getCompressedFileExtension();
 }

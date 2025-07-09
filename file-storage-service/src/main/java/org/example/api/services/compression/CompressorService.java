@@ -14,10 +14,7 @@ import org.example.api.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,60 +50,50 @@ public class CompressorService {
         File file = fileUtils.getFileOrThrowException(path);
         String fileMimeType = fileUtils.getFileMime(file);
         ComprssionStrategy compressionStrategy = compressionStrategies.get(fileMimeType);
+        String fileExc = compressionStrategy.getCompressedFileExtension();
+        File compressedFile = new File(compressedStoragePath, file.getName()+fileExc);
 
-        byte[] compressedByte = compressFile(file, compressionStrategy);
-        String pathToCompressedFile = writeCompressedFile(compressedByte, path, compressionStrategy);
+        long compressedSize = compressFile(file, compressionStrategy, compressedFile);
 
         return CompressedFileDto.builder()
-                .path(pathToCompressedFile)
-                .compressedSize((long) compressedByte.length)
+                .path(compressedFile.getPath())
+                .compressedSize(compressedSize)
                 .build();
     }
 
     public String decompressFileAndWrite(String path) {
-        File file = fileUtils.getFileOrThrowException(path);
+        File inputFile = fileUtils.getFileOrThrowException(path);
         String fileExtension = "." + fileUtils.getFileExtension(path);
         ComprssionStrategy comprssionStrategy = decompressionStrategies.get(fileExtension);
-        byte[] decompressedByte = decompressFile(file, comprssionStrategy);
-        String pathToDecompressedFile = writeDecompressedFile(decompressedByte, path, comprssionStrategy);
-        return pathToDecompressedFile;
-    }
 
-    private byte[] compressFile(File file,
-                                ComprssionStrategy compressionStrategy) {
-        try {
-            InputStream fileInputStream = new FileInputStream(file);
-            return compressionStrategy.compress(fileInputStream);
-        } catch (FileNotFoundException e) {
-            throw new BadRequestException("File not found.");
-        }
-    }
-
-    private byte[] decompressFile(File file,
-                                  ComprssionStrategy compressionStrategy) {
-        try {
-            InputStream fileInputStream = new FileInputStream(file);
-            return compressionStrategy.deсompress(fileInputStream);
-        } catch (FileNotFoundException e) {
-            throw new BadRequestException("File not found.");
-        }
-    }
-
-    private String writeCompressedFile(byte[] compressedByte,
-                                       String oldPath,
-                                       ComprssionStrategy compressionStrategy) {
-        String fileExc = compressionStrategy.getCompressedFileExtension();
-        String fileName = fileUtils.getFileName(oldPath) + fileExc;
-
-        return fileUtils.createFileInDir(fileName, compressedByte, compressedStoragePath);
-    }
-
-    private String writeDecompressedFile(byte[] decompressedByte,
-                                       String oldPath,
-                                       ComprssionStrategy compressionStrategy) {
-        String fileName = fileUtils.getFileName(oldPath);
+        String fileName = fileUtils.getFileName(path);
         String baseName = fileName.replaceFirst("\\.[^.]+$", "");
+        File outputFile = new File(decompressedStoragePath, baseName);
 
-        return fileUtils.createFileInDir(baseName, decompressedByte, decompressedStoragePath);
+        return decompressFile(inputFile, comprssionStrategy, outputFile);
+    }
+
+    private long compressFile(File file, ComprssionStrategy compressionStrategy, File outputFile) {
+        try (InputStream fileInputStream = new BufferedInputStream(new FileInputStream(file), 8 * 1024 * 1024);
+                OutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(outputFile), 8 * 1024 * 1024)) {
+            compressionStrategy.compress(fileInputStream, fileOutputStream);
+            return outputFile.length();
+        } catch (IOException e) {
+            throw new BadRequestException("File compression failed");
+        }
+    }
+
+    private String decompressFile(File file,
+                                  ComprssionStrategy compressionStrategy,
+                                  File outputFile) {
+        try (InputStream fileInputStream = new FileInputStream(file);
+                OutputStream fileOutputStream = new FileOutputStream(outputFile)) {
+            compressionStrategy.decompress(fileInputStream, fileOutputStream);
+            return outputFile.getPath();
+        } catch (FileNotFoundException e) {
+            throw new BadRequestException("File not found.");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
