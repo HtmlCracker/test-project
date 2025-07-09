@@ -59,39 +59,24 @@ public class UploadStateMachineConfig extends StateMachineConfigurerAdapter<Uplo
     @Bean
     public Action<UploadFileState, UploadFileEvent> compressAction() {
         return context -> {
-            long startTime = System.currentTimeMillis();
-
             String fileId = (String) context.getExtendedState().getVariables().get("fileId");
             fileStorageService.compress(fileId);
-
-            long endTime = System.currentTimeMillis();
-            System.out.println("Compress time (ms): " + (endTime - startTime));
         };
     }
 
     @Bean
     public Action<UploadFileState, UploadFileEvent> encryptAction() {
         return context -> {
-            long startTime = System.currentTimeMillis();
-
             String fileId = (String) context.getExtendedState().getVariables().get("fileId");
             fileStorageService.encrypt(fileId);
-
-            long endTime = System.currentTimeMillis();
-            System.out.println("Encrypt time (ms): " + (endTime - startTime));
         };
     }
 
     @Bean
     public Action<UploadFileState, UploadFileEvent> storeAction() {
         return context -> {
-            long startTime = System.currentTimeMillis();
-
             String fileId = (String) context.getExtendedState().getVariables().get("fileId");
             fileStorageService.store(fileId);
-
-            long endTime = System.currentTimeMillis();
-            System.out.println("Store time (ms): " + (endTime - startTime));
         };
     }
 }

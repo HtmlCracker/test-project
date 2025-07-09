@@ -28,12 +28,11 @@ public class EncryptionUtils {
 
     private long doCrypto(int cipherMode, String key, File inputFile, File outputFile) {
         try (FileInputStream inputStream = new FileInputStream(inputFile);
-             FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-
+                FileOutputStream outputStream = new FileOutputStream(outputFile)) {
             Cipher cipher = initCipher(cipherMode, key);
 
             try (CipherOutputStream cipherOutputStream = new CipherOutputStream(outputStream, cipher)) {
-                byte[] buffer = new byte[8192];
+                byte[] buffer = new byte[4 * 1024 * 1024];
                 int bytesRead;
 
                 while ((bytesRead = inputStream.read(buffer)) != -1) {

@@ -82,7 +82,6 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
         return context -> {
             String filePath = (String) context.getExtendedState().getVariables().get("filePath");
             String newPath = fileStorageService.decompress(filePath);
-            System.out.println(newPath + " DECOMPRESSED");
             context.getExtendedState().getVariables().put("filePath", newPath);
         };
     }
