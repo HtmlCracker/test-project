@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -16,33 +18,33 @@ import java.security.NoSuchAlgorithmException;
 public class FileUtils {
     public String createFileInDir(String fileName, MultipartFile file, String pathToDir) {
         try {
-            return createFileInDir(fileName, file.getBytes(), pathToDir);
+            return createFileInDir(fileName, file.getInputStream(), pathToDir);
         } catch (IOException e) {
-            throw new BadRequestException("File can't be empty");
+            throw new BadRequestException("File can't be empty or inaccessible");
         }
     }
 
     public String createFileInDir(String fileName, File file, String pathToDir) {
         try {
-            return createFileInDir(fileName, Files.readAllBytes(file.toPath()), pathToDir);
+            return createFileInDir(fileName, new FileInputStream(file), pathToDir);
         } catch (IOException e) {
-            throw new BadRequestException("File can't be empty");
+            throw new BadRequestException("File can't be empty or inaccessible");
         }
     }
 
-    public String createFileInDir(String fileName, byte[] fileInByte, String pathToDir) {
-        if (fileInByte.length == 0) {
-            throw new BadRequestException("File can't be empty");
-        }
+    public String createFileInDir(String fileName, InputStream inputStream, String pathToDir) {
         createDirectoryIfNotExists(pathToDir);
-
         Path filePath = Paths.get(pathToDir, fileName);
 
-        try {
-            Files.write(filePath, fileInByte);
+        try (inputStream) {
+            if (inputStream == null) {
+                throw new BadRequestException("Input stream is null");
+            }
+
+            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
             return filePath.toString();
         } catch (IOException e) {
-            throw new BadRequestException("Save file error");
+            throw new BadRequestException("Save file error: " + e.getMessage());
         }
     }
 
