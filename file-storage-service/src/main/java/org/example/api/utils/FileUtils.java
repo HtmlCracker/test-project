@@ -114,6 +114,11 @@ public class FileUtils {
         return fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length());
     }
 
+    public String getFileMime(String path) {
+        File file = getFileOrThrowException(path);
+        return getFileMime(file);
+    }
+
     public String getFileMime(File file) {
         try {
             String mimeType = Files.probeContentType(file.toPath());
@@ -126,6 +131,16 @@ public class FileUtils {
         } catch (IOException e) {
             return "unknown";
         }
+    }
+
+    public String getFileMime(MultipartFile file) {
+        String mimeType = file.getContentType();
+
+        if (mimeType == null) {
+            return "unknown mime type";
+        }
+
+        return mimeType.split("/")[0];
     }
 
     public String getFileName(String path) {

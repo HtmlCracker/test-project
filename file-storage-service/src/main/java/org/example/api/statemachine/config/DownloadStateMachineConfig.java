@@ -4,8 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.example.api.services.FileOperationService;
 import org.example.api.statemachine.state.download.DownloadFileEvent;
 import org.example.api.statemachine.state.download.DownloadFileState;
+import org.example.api.statemachine.state.upload.UploadFileEvent;
+import org.example.api.statemachine.state.upload.UploadFileState;
+import org.example.api.utils.FileUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.StateMachineConfigurerAdapter;
@@ -19,6 +23,7 @@ import java.util.EnumSet;
 @EnableStateMachineFactory(name = "downloadStateMachineFactory")
 public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<DownloadFileState, DownloadFileEvent> {
     private final FileOperationService fileStorageService;
+    private final FileUtils fileUtils;
 
     @Override
     public void configure(StateMachineStateConfigurer<DownloadFileState, DownloadFileEvent> states)
@@ -49,7 +54,15 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
                 .withExternal()
                 .source(DownloadFileState.DECRYPTED)
                 .target(DownloadFileState.DECOMPRESSED)
+                .guard(this::shouldDecompress)
                 .action(decompressAction())
+
+                .and()
+                .withExternal()
+                .source(DownloadFileState.DECRYPTED)
+                .target(DownloadFileState.READY)
+                .guard(ctx -> !shouldDecompress(ctx))
+                .action(deliverAction())
 
                 .and()
                 .withExternal()
@@ -57,6 +70,12 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
                 .target(DownloadFileState.READY)
                 .event(DownloadFileEvent.DELIVER)
                 .action(deliverAction());
+    }
+
+    private boolean shouldDecompress(StateContext<DownloadFileState, DownloadFileEvent> context) {
+        String filePath = (String) context.getExtendedState().getVariables().get("filePath");
+        String mimeType = fileUtils.getFileMime(filePath);
+        return !mimeType.equals("image") && !mimeType.equals("video");
     }
 
     @Bean
@@ -91,7 +110,6 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
         return context -> {
             String filePath = (String) context.getExtendedState().getVariables().get("filePath");
             String newPath = fileStorageService.deliver(filePath);
-            System.out.println(newPath + " DELIVERED");
             context.getExtendedState().getVariables().put("filePath", newPath);
         };
     }

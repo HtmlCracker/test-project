@@ -15,7 +15,6 @@ PATH_TO_READY_FOR_GET_STORAGE: /files/get/ready-for-get-storage
 
 compression:
   text-type: text
-
   binary-type: application
 
 spring:

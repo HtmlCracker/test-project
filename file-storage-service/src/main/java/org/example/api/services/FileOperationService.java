@@ -48,6 +48,12 @@ public class FileOperationService {
     FileUtils fileUtils;
 
     @Transactional
+    public String getFileMimeType(String fileId) {
+        UUID uuid = UUID.fromString(fileId);
+        return fileInfoCacheService.getFileEntityById(uuid).getMimeType();
+    }
+
+    @Transactional
     public void compress(String id) {
         UUID fileId = UUID.fromString(id);
         FileInfoEntity entity = fileInfoCacheService.getFileEntityById(fileId);

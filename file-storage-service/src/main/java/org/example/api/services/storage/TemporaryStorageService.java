@@ -36,11 +36,13 @@ public class TemporaryStorageService {
                                               String fileHash,
                                               String filePath) {
         String origFileName = file.getOriginalFilename();
+        String mimeType = fileUtils.getFileMime(file);
         String fileExt = fileUtils.getFileExtension(origFileName);
 
         return FileInfoEntity.builder()
                 .originalFileName(origFileName)
                 .originalFileSize(file.getSize())
+                .mimeType(mimeType)
                 .fileExt(fileExt)
                 .fileState(UploadFileState.UPLOADED)
                 .fileHash(fileHash)

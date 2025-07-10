@@ -49,6 +49,9 @@ public class FileInfoEntity {
     String filePath;
 
     @Column(nullable = false)
+    String mimeType;
+
+    @Column(nullable = false)
     String fileExt;
 
     @Enumerated(EnumType.STRING)
