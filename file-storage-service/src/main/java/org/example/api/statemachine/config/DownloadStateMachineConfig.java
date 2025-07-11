@@ -75,7 +75,7 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
     private boolean shouldDecompress(StateContext<DownloadFileState, DownloadFileEvent> context) {
         String filePath = (String) context.getExtendedState().getVariables().get("filePath");
         String mimeType = fileUtils.getFileMime(filePath);
-        return !mimeType.equals("image") && !mimeType.equals("video");
+        return !mimeType.equals("image") && !mimeType.equals("video") && !mimeType.equals("audio");
     }
 
     @Bean

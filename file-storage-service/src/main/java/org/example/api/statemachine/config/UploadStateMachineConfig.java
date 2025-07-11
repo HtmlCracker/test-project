@@ -67,7 +67,7 @@ public class UploadStateMachineConfig extends StateMachineConfigurerAdapter<Uplo
     private boolean shouldCompress(StateContext<UploadFileState, UploadFileEvent> context) {
         String fileId = (String) context.getExtendedState().getVariables().get("fileId");
         String mimeType = fileStorageService.getFileMimeType(fileId);
-        return !mimeType.equals("image") && !mimeType.equals("video");
+        return !mimeType.equals("image") && !mimeType.equals("video") && !mimeType.equals("audio");
     }
 
     @Bean
