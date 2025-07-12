@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.3.5'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'jacoco'
 }
 
 java {
@@ -69,6 +70,42 @@ dependencies {
 // Spring Data Jpa
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+}
+
+// JaCoCo
+jacoco {
+    toolVersion = "0.8.7"
+    reportsDirectory = layout.buildDirectory.dir("jacocoReports")
+}
+
+test {
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "**/configs/**",
+                    "**/client/**",
+                    "**/exceptions/**",
+                    "**/factories/**",
+                    "**/dto/**",
+                    "**/entities/**",
+                    "**/lombok/**",
+                    "**/Main.class"
+            ])
+        }))
+    }
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
 }
 
 dependencyManagement {
