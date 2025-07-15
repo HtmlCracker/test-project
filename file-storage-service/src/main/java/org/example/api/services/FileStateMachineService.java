@@ -7,6 +7,7 @@ import org.example.api.statemachine.state.download.DownloadFileEvent;
 import org.example.api.statemachine.state.download.DownloadFileState;
 import org.example.api.statemachine.state.upload.UploadFileEvent;
 import org.example.api.statemachine.state.upload.UploadFileState;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.statemachine.ExtendedState;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineFactory;
@@ -16,9 +17,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class FileStateMachineService {
+    @Autowired
     StateMachineFactory<UploadFileState, UploadFileEvent> uploadStateMachineFactory;
+    @Autowired
     StateMachineFactory<DownloadFileState, DownloadFileEvent> downloadStateMachineFactory;
 
     public void resortingUploadState(String fileId, UploadFileState currentState) {
