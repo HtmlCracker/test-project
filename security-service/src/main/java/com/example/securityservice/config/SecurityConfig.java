@@ -38,7 +38,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers("/**").permitAll();
+                    registry.requestMatchers("auth/public/**").permitAll();
+                    registry.requestMatchers("api/public/accounts/**").permitAll();
+                    registry.anyRequest().authenticated();
                 })
                 .authenticationProvider(authenticationProvider())
                 .build();

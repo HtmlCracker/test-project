@@ -7,8 +7,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 
@@ -29,28 +31,48 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
 
     @Override
     public GatewayFilter apply(Config config) {
-        return (((exchange, chain) -> {
-            if (routeValidator.isSecured.test(exchange.getRequest())){
+        return (exchange, chain) -> {
+            ServerHttpRequest request = exchange.getRequest();
 
-                if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-                    throw new RuntimeException("Missing authorization header!");
+            if (routeValidator.isSecured.test(request)) {
+                String token = extractTokenFromHeaders(request);
+
+                if (token == null) {
+                    throw new RuntimeException("Missing authorization token!");
                 }
 
-                String authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
+                RequestEntity<Void> requestEntity = new RequestEntity<>(
+                        HttpMethod.GET,
+                        URI.create(validateUrl + token)
+                );
 
-                if (authHeader!=null && authHeader.startsWith("Bearer "))
-                    authHeader = authHeader.substring(7);
+                ResponseEntity<String> response = restTemplate.exchange(requestEntity, String.class);
 
-                RequestEntity<Void> requestEntity = new RequestEntity<>(HttpMethod.GET, URI.create(validateUrl + authHeader));
-                ResponseEntity<String> response = restTemplate.exchange(requestEntity,String.class);
-                if (response.getBody().equals("Invalid token"))
+                if ("Invalid token".equals(response.getBody())) {
                     throw new RuntimeException("Invalid token");
+                }
+
+                // Добавляем токен в параметры запроса для chat-service
+                if (request.getURI().getPath().startsWith("/ws")) {
+                    URI newUri = UriComponentsBuilder.fromUri(request.getURI())
+                            .queryParam("token", token)
+                            .build()
+                            .toUri();
+                    exchange.getRequest().mutate().uri(newUri);
+                }
             }
 
             return chain.filter(exchange);
-        }));
+        };
     }
 
+    private String extractTokenFromHeaders(ServerHttpRequest request) {
+        String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return null;
+    }
     public static class Config{
 
     }

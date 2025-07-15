@@ -8,6 +8,11 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+      httpclient:
+        ssl:
+          use-insecure-trust-manager: true
+        connect-timeout: 5000
+        response-timeout: 10000
       routes:
         - id: security-service
           uri: lb://security-service
@@ -16,7 +21,13 @@ spring:
         - id: publication-service
           uri: lb://profile-service
           predicates:
-            - Path=/api/private/**
+            - Path=/api/**
+        - id: chat-service
+          uri: lb://chat-service
+          predicates:
+            - Path=/ws/**
+          #filters:
+          #  - StripPrefix=1
     consul:
       host: http://consul
       port: 8500

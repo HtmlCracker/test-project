@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.api.dto.request.ProfileRegistrationRequestDto;
 import org.example.api.dto.request.ProfileUpdateRequestDto;
 import org.example.api.dto.response.DelProfileResponseDto;
+import org.example.api.dto.response.ProfileResponseDto;
 import org.example.api.entities.ProfileEntity;
 import org.example.api.exceptions.BadRequestException;
 import org.example.api.exceptions.NotFoundException;
@@ -85,5 +86,10 @@ public class ProfileService {
         return DelProfileResponseDto.builder()
                 .status("The profile has been deleted.")
                 .build();
+    }
+
+    public ProfileEntity getProfileByEmailOrThrowException(String email) {
+        return profileRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(String.format("Account with id \"%s\" does not exist", email)));
     }
 }

@@ -8,9 +8,11 @@ import java.util.function.Predicate;
 
 @Component
 public class RouteValidator {
+    // не требуют проверки JWT
     public static final List<String> openApiEndpoints = List.of(
-            "/**"
-    );
+            "/auth/public/**",
+            "/actuator/**"
+            );
 
     public Predicate<ServerHttpRequest> isSecured =
             serverHttpRequest -> openApiEndpoints

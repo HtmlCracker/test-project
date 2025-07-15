@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: chat-service
+server:
+  port: 8889
+
+  kafka:
+    bootstrap-servers: kafka:29092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.UUIDSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+
+  cloud:
+    consul:
+      host: consul
+      port: 8500
+      discovery:
+        health-check-path: /actuator/health
+        prefer-ip-address: true
+
+feign:
+  client:
+    config:
+      default:
+        http-method-retry-enabled: false
+
+  websocket:
+    max-text-message-size: 65536  # Максимальный размер текстового сообщения (64 KB)
+    max-binary-message-size: 131072  # Максимальный размер бинарного сообщения (128 KB)
+    buffer-size: 131072  # Размер буфера (128 KB)
+    time-to-close-session: 30000  # Таймаут закрытия сессии (30 секунд)
+
+jwt_secret: ${JWT_SECRET}

@@ -20,7 +20,7 @@ import java.util.UUID;
 @Table(name = "profile")
 public class ProfileEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.UUID) //todo взять из jwt
     UUID id;
 
     String email;

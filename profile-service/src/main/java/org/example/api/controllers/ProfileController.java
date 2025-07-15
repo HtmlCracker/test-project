@@ -27,7 +27,7 @@ public class ProfileController {
 
     public static final String REGISTRATION_PROFILE = "api/public/accounts/registration";
     public static final String UPDATE_PROFILE = "api/private/accounts/update/{profileId}";
-    public static final String GET_PROFILE = "api/private/accounts/get/{profileId}";
+    public static final String GET_PROFILE = "api/public/accounts/get/{profileId}";
     public static final String DEL_PROFILE = "api/private/accounts/del/{profileId}";
 
     @PostMapping(REGISTRATION_PROFILE)
