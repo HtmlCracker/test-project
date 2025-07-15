@@ -14,8 +14,4 @@ public enum UploadFileState {
         }
         return VALUES[this.ordinal() + 1];
     }
-
-    public boolean isBefore(UploadFileState other) {
-        return this.ordinal() < other.ordinal();
-    }
 }

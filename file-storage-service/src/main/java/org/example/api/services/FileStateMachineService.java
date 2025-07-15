@@ -32,7 +32,7 @@ public class FileStateMachineService {
         stateMachine.start();
 
         try {
-            if (currentState == UploadFileState.STORED) {
+            if (currentState.next() == null) {
                 return;
             }
 
@@ -50,7 +50,7 @@ public class FileStateMachineService {
                     });
 
             UploadFileState state = currentState;
-            while (state != null && state != UploadFileState.STORED) {
+            while (state.next() != null) {
                 UploadFileEvent event = getEventForState(state);
                 stateMachine.sendEvent(event);
                 state = state.next();

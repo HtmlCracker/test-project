@@ -48,6 +48,80 @@ public class FileStateMachineServiceTest {
     StateMachineAccess<UploadFileState, UploadFileEvent> stateMachineAccess;
 
     @Test
+    void resortingUploadState_shouldProcessFromStoredToStored() {
+        when(uploadStateMachineFactory.getStateMachine()).thenReturn(uploadStateMachine);
+        ExtendedState extendedState = new DefaultExtendedState(new HashMap<>());
+        when(uploadStateMachine.getExtendedState()).thenReturn(extendedState);
+        when(uploadStateMachine.getStateMachineAccessor()).thenReturn(accessor);
+
+        doAnswer(invocation -> {
+            Consumer<StateMachineAccess<UploadFileState, UploadFileEvent>> action = invocation.getArgument(0);
+            action.accept(stateMachineAccess);
+            return null;
+        }).when(accessor).doWithAllRegions(any());
+
+        fileStateMachineService.resortingUploadState("file123", UploadFileState.ENCRYPTED);
+
+        InOrder inOrder = inOrder(uploadStateMachine);
+        inOrder.verify(uploadStateMachine).start();
+        inOrder.verify(uploadStateMachine).stop();
+
+        assertEquals("file123", extendedState.getVariables().get("fileId"));
+    }
+
+    @Test
+    void resortingUploadState_shouldProcessFromEncryptedToStored() {
+        when(uploadStateMachineFactory.getStateMachine()).thenReturn(uploadStateMachine);
+        ExtendedState extendedState = new DefaultExtendedState(new HashMap<>());
+        when(uploadStateMachine.getExtendedState()).thenReturn(extendedState);
+        when(uploadStateMachine.getStateMachineAccessor()).thenReturn(accessor);
+
+        doAnswer(invocation -> {
+            Consumer<StateMachineAccess<UploadFileState, UploadFileEvent>> action = invocation.getArgument(0);
+            action.accept(stateMachineAccess);
+            return null;
+        }).when(accessor).doWithAllRegions(any());
+
+        when(uploadStateMachine.sendEvent(UploadFileEvent.STORE)).thenReturn(true);
+
+        fileStateMachineService.resortingUploadState("file123", UploadFileState.ENCRYPTED);
+
+        InOrder inOrder = inOrder(uploadStateMachine);
+        inOrder.verify(uploadStateMachine).start();
+        inOrder.verify(uploadStateMachine).sendEvent(UploadFileEvent.STORE);
+        inOrder.verify(uploadStateMachine).stop();
+
+        assertEquals("file123", extendedState.getVariables().get("fileId"));
+    }
+
+    @Test
+    void resortingUploadState_shouldProcessFromCompressedToStored() {
+        when(uploadStateMachineFactory.getStateMachine()).thenReturn(uploadStateMachine);
+        ExtendedState extendedState = new DefaultExtendedState(new HashMap<>());
+        when(uploadStateMachine.getExtendedState()).thenReturn(extendedState);
+        when(uploadStateMachine.getStateMachineAccessor()).thenReturn(accessor);
+
+        doAnswer(invocation -> {
+            Consumer<StateMachineAccess<UploadFileState, UploadFileEvent>> action = invocation.getArgument(0);
+            action.accept(stateMachineAccess);
+            return null;
+        }).when(accessor).doWithAllRegions(any());
+
+        when(uploadStateMachine.sendEvent(UploadFileEvent.ENCRYPT)).thenReturn(true);
+        when(uploadStateMachine.sendEvent(UploadFileEvent.STORE)).thenReturn(true);
+
+        fileStateMachineService.resortingUploadState("file123", UploadFileState.COMPRESSED);
+
+        InOrder inOrder = inOrder(uploadStateMachine);
+        inOrder.verify(uploadStateMachine).start();
+        inOrder.verify(uploadStateMachine).sendEvent(UploadFileEvent.ENCRYPT);
+        inOrder.verify(uploadStateMachine).sendEvent(UploadFileEvent.STORE);
+        inOrder.verify(uploadStateMachine).stop();
+
+        assertEquals("file123", extendedState.getVariables().get("fileId"));
+    }
+
+    @Test
     void resortingUploadState_shouldProcessFromUploadedToStored() {
         when(uploadStateMachineFactory.getStateMachine()).thenReturn(uploadStateMachine);
         ExtendedState extendedState = new DefaultExtendedState(new HashMap<>());
