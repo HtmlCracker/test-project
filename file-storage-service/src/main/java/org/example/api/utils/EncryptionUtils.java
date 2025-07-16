@@ -16,13 +16,11 @@ public class EncryptionUtils {
     private static final String ALGORITHM = "AES";
     private static final String TRANSFORMATION = "AES";
 
-    public long encrypt(String key, File inputFile, File outputFile)
-            throws CryptoException {
+    public long encrypt(String key, File inputFile, File outputFile) {
         return doCrypto(Cipher.ENCRYPT_MODE, key, inputFile, outputFile);
     }
 
-    public long decrypt(String key, File inputFile, File outputFile)
-            throws CryptoException {
+    public long decrypt(String key, File inputFile, File outputFile) {
         return doCrypto(Cipher.DECRYPT_MODE, key, inputFile, outputFile);
     }
 
@@ -43,24 +41,6 @@ public class EncryptionUtils {
         } catch (IOException | SecurityException e) {
             throw new FileProcessingException("File processing error");
         }
-    }
-
-    private byte[] cryptoInputBytes(int cipherMode, String key, byte[] inputBytes) {
-        Cipher cipher;
-        Key secretKey = new SecretKeySpec(key.getBytes(), ALGORITHM);
-        byte[] outputBytes;
-
-        try {
-            cipher = Cipher.getInstance(TRANSFORMATION);
-            cipher.init(cipherMode, secretKey);
-            outputBytes = cipher.doFinal(inputBytes);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException |
-                IllegalBlockSizeException | BadPaddingException e) {
-            throw new CryptoException("Crypto algorithm error");
-        } catch (InvalidKeyException e) {
-            throw new CryptoException("Invalid key exception");
-        }
-        return outputBytes;
     }
 
     private Cipher initCipher(int cipherMode, String key) {
