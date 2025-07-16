@@ -129,7 +129,7 @@ public class FileUtils {
 
             return mimeType.split("/")[0];
         } catch (IOException e) {
-            return "unknown";
+            throw new RuntimeException(e);
         }
     }
 
