@@ -26,6 +26,7 @@ public class JwtService {
                 .claim("userId", user.getId().toString())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1_800_000))
+                .setIssuer("SecurityService")
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -38,7 +39,8 @@ public class JwtService {
     public boolean isTokenValid(String token, UserDetails userDetails){
         String username = extractEmail(token);
         return username.equals(userDetails.getUsername())
-                && extractClaim(token, Claims::getExpiration).after(new Date(System.currentTimeMillis()));
+                && extractClaim(token, Claims::getExpiration).after(new Date(System.currentTimeMillis()))
+                && "SecurityService".equals(extractClaim(token, Claims::getIssuer));
     }
 
     public String extractEmail(String token){

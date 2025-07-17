@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -12,5 +14,9 @@ import java.util.UUID;
 public class MemberDto {
     private UUID id;
     private String email;
-    private String username;
+    private String name;
+    private String surname;
+    private String description;
+    private List<String> roles;
+    private Instant registrationDate;
 }

@@ -7,6 +7,7 @@ import java.util.UUID;
 
 @Data
 public class Message {
+    private UUID messageId;
     private UUID senderId;
     private UUID recipientId;
     private String text;

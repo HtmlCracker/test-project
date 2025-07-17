@@ -161,6 +161,33 @@ services:
     networks:
       - consul-net
 
+  chat-service:
+    build: ./chat-service
+    image: chat-service
+    ports:
+      - 8081:8081
+    depends_on:
+      - kafka
+      - chatDb
+    networks:
+      - consul-net
+
+  chatDb:
+    image: postgres:alpine
+    container_name: chatDb
+    hostname: chatDb
+    ports:
+      - 5438:5438
+    environment:
+      POSTGRES_DB: chat_history
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - ./chatDb:/data
+    networks:
+      - consul-net
+
   consul:
     container_name: consul
     image: consul:1.1.0

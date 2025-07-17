@@ -36,7 +36,7 @@ public class WebSocketHandshakeInterceptor implements HandshakeHandler {
 
         try {
             UUID userId = jwtUtil.extractUserId(token);
-            if (userId == null || jwtUtil.isTokenExpired(token)) {
+            if (userId == null) {
                 response.setStatusCode(HttpStatus.FORBIDDEN);
                 return false;
             }

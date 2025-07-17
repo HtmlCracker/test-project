@@ -34,4 +34,15 @@ feign:
     buffer-size: 131072  # Размер буфера (128 KB)
     time-to-close-session: 30000  # Таймаут закрытия сессии (30 секунд)
 
-jwt_secret: ${JWT_SECRET}
+  datasource:
+    url: jdbc:postgresql://chatDb:5438/chat_history
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update

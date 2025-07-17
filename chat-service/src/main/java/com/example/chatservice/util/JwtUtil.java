@@ -1,43 +1,41 @@
 package com.example.chatservice.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import java.security.Key;
-import java.util.Date;
+import java.text.ParseException;
+import java.util.Base64;
+import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
 
-    @Value("${jwt_secret}")
-    private String SECRET_KEY;
+    private final ObjectMapper objectMapper;
 
     public UUID extractUserId(String token) {
-        String userIdStr = extractClaim(token, Claims::getSubject);
-        return UUID.fromString(userIdStr);
+        try {
+
+            String payload = extractPayload(token);
+            Map<String, Object> claims = parseClaims(payload);
+            String userIdStr = (String) claims.get("userId");
+            return UUID.fromString(userIdStr);
+        } catch (Exception e) {}
+        throw new JwtException("Invalid JWT Token");
     }
 
-    private <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimResolver.apply(claims);
+    private String extractPayload(String token) throws ParseException {
+        String[] parts = token.split("\\.");
+        if (parts.length != 3) {
+            throw new ParseException("Invalid JWT token format", 0);
+        }
+        return new String(Base64.getDecoder().decode(parts[1]));
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    public boolean isTokenExpired(String token) {
-        Date expiration = extractAllClaims(token).getExpiration();
-        return expiration.before(new Date());
+    private Map<String, Object> parseClaims(String payload) throws JsonProcessingException {
+        return objectMapper.readValue(payload, Map.class);
     }
 }
