@@ -1,5 +1,6 @@
 package com.example.chatservice.entity;
 
+import com.example.chatservice.state.MessageState;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,5 +33,9 @@ public class ChatMessage {
 
     @Column(name = "is_read")
     private boolean isRead;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private MessageState status;
 
 }

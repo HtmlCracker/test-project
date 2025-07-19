@@ -1,0 +1,5 @@
+package com.example.chatservice.state;
+
+public enum MessageState {
+    SENT, DELIVERED, READ, EDITED, FAILED
+}
