@@ -1,7 +1,6 @@
 package com.example.chatservice.kafka;
 
 import com.example.chatservice.dto.Message;
-import com.example.chatservice.repository.ChatMessageRepository;
 import com.example.chatservice.service.ChatMessageService;
 import com.example.chatservice.websocket.ChatWebSocketHandler;
 import lombok.RequiredArgsConstructor;

@@ -1,5 +1,6 @@
 package com.example.chatservice.dto;
 
+import com.example.chatservice.state.MessageState;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -12,4 +13,6 @@ public class Message {
     private UUID recipientId;
     private String text;
     private LocalDateTime timestamp;
+    private MessageState status = MessageState.SENT;
+    private LocalDateTime readAt;
 }

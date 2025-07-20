@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,17 +38,19 @@ public class ChatMessageService {
         List<ChatMessage> chatMessages = chatMessageRepository.findBySenderIdAndRecipientId(senderId, recipientId);
         for (ChatMessage chatMessage : chatMessages) {
             chatMessage.setRead(true);
+            chatMessage.setReadAt(LocalDateTime.now());
             chatMessageRepository.save(chatMessage);
         }
     }
 
-    private ChatMessage toChatMessage(Message Message) {
+    private ChatMessage toChatMessage(Message message) {
         ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setSenderId(Message.getSenderId());
-        chatMessage.setRecipientId(Message.getRecipientId());
-        chatMessage.setText(Message.getText());
-        chatMessage.setTimestamp(Message.getTimestamp());
+        chatMessage.setSenderId(message.getSenderId());
+        chatMessage.setRecipientId(message.getRecipientId());
+        chatMessage.setText(message.getText());
+        chatMessage.setTimestamp(message.getTimestamp());
         chatMessage.setRead(false);
+        chatMessage.setStatus(message.getStatus());
         return chatMessage;
     }
 

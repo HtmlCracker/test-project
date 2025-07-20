@@ -38,4 +38,7 @@ public class ChatMessage {
     @Enumerated(EnumType.STRING)
     private MessageState status;
 
+    @Column(name = "read_at")
+    private LocalDateTime readAt;
+
 }
