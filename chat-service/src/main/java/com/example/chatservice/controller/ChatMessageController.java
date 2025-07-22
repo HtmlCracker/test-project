@@ -33,5 +33,26 @@ public class ChatMessageController {
         return ResponseEntity.ok(history);
     }
 
+    @PatchMapping("/edit/{messageId}")
+    public ResponseEntity<Message> editMessage(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable UUID messageId,
+            @RequestBody String newText) {
+        String token = authHeader.substring(7);
+        UUID userId = jwtUtil.extractUserId(token);
 
+        Message message = chatMessageService.editMessage(messageId, userId, newText);
+        return ResponseEntity.ok(message);
+    }
+
+    @DeleteMapping("/{messageId}")
+    public ResponseEntity<Void> deleteMessage(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable UUID messageId) {
+        String token = authHeader.substring(7);
+        UUID userId = jwtUtil.extractUserId(token);
+
+        chatMessageService.deleteMessage(messageId, userId);
+        return ResponseEntity.noContent().build();
+    }
 }

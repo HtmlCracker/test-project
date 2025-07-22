@@ -15,4 +15,5 @@ public class Message {
     private LocalDateTime timestamp;
     private MessageState status = MessageState.SENT;
     private LocalDateTime readAt;
+    private boolean isEdited = false;
 }

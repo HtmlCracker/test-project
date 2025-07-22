@@ -31,9 +31,6 @@ public class ChatMessage {
     @Column(name = "timestamp")
     private LocalDateTime timestamp;
 
-    @Column(name = "is_read")
-    private boolean isRead;
-
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private MessageState status;
@@ -41,4 +38,6 @@ public class ChatMessage {
     @Column(name = "read_at")
     private LocalDateTime readAt;
 
+    @Column(name = "is_edited")
+    private boolean isEdited = false;
 }
