@@ -93,6 +93,7 @@ jacocoTestReport {
                     "**/dto/**",
                     "**/entities/**",
                     "**/lombok/**",
+                    "**/state/**",
                     "**/Main.class"
             ])
         }))
