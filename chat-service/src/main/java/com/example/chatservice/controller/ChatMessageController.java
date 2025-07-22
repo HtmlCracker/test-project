@@ -4,6 +4,7 @@ import com.example.chatservice.dto.Message;
 import com.example.chatservice.entity.ChatMessage;
 import com.example.chatservice.service.ChatMessageService;
 import com.example.chatservice.util.JwtUtil;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -23,13 +24,14 @@ public class ChatMessageController {
     }
 
     @GetMapping("/history/{recipientId}")
-    public ResponseEntity<List<Message>> history(@PathVariable UUID recipientId, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Page<Message>> history(@PathVariable UUID recipientId, @RequestHeader("Authorization") String authHeader,
+                                                 @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "50") int size) {
         String token = authHeader.substring(7);
         UUID senderId = jwtUtil.extractUserId(token);
         if (recipientId == null) {
             return ResponseEntity.badRequest().build();
         }
-        List<Message> history = chatMessageService.getChatHistory(senderId, recipientId);
+        Page<Message> history = chatMessageService.getChatHistory(senderId, recipientId, page, size);
         return ResponseEntity.ok(history);
     }
 

@@ -6,6 +6,10 @@ import com.example.chatservice.entity.ChatMessage;
 import com.example.chatservice.repository.ChatMessageRepository;
 import com.example.chatservice.state.MessageState;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +32,13 @@ public class ChatMessageService {
        return chatMessageRepository.save(chatMessage);
     }
 
-    public List<Message> getChatHistory(UUID senderId, UUID recipientId) {
+    public Page<Message> getChatHistory(UUID senderId, UUID recipientId, int page, int size) {
         validateRecipient(senderId);
         validateRecipient(recipientId);
         markAllAsRead(senderId, recipientId);
-        List<ChatMessage>  chatMessages = chatMessageRepository.findBySenderIdAndRecipientId(senderId, recipientId);
-        return chatMessages.stream().map(this::toMessage).collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "timestamp"));
+        Page<ChatMessage> chatMessages = chatMessageRepository.findBySenderIdAndRecipientId(senderId, recipientId, pageable);
+        return chatMessages.map(this::toMessage);
     }
 
     public void markAsDelivered(UUID messageId) {
