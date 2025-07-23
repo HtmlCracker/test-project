@@ -16,9 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,7 +45,6 @@ public class TemporaryStorageServiceTest {
 
     @Test
     void temporaryUploadFile_shouldSuccessfullyProcessFile() throws Exception {
-        // Arrange
         String originalFilename = "test.txt";
         String fileHash = "abc123";
         String fileExt = "txt";
@@ -74,10 +73,8 @@ public class TemporaryStorageServiceTest {
 
         when(fileInfoCacheService.saveFileInfoEntity(any(FileInfoEntity.class))).thenReturn(expectedEntity);
 
-        // Act
         FileInfoEntity result = temporaryStorageService.temporaryUploadFile(multipartFile);
 
-        // Assert
         assertNotNull(result);
         assertEquals(originalFilename, result.getOriginalFileName());
         assertEquals(fileSize, result.getOriginalFileSize());
@@ -93,6 +90,4 @@ public class TemporaryStorageServiceTest {
         verify(fileUtils).createFileInDir(expectedFileName, multipartFile, tempDir.toString());
         verify(fileInfoCacheService).saveFileInfoEntity(any(FileInfoEntity.class));
     }
-
-
 }
