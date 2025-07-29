@@ -1,7 +1,6 @@
 package org.example.api.statemachine.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.api.repositories.FileInfoRepository;
 import org.example.api.services.FileOperationService;
 import org.example.api.statemachine.state.upload.UploadFileEvent;
 import org.example.api.statemachine.state.upload.UploadFileState;

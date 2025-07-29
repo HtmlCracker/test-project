@@ -18,7 +18,7 @@ public class EncryptorService {
     final FileUtils fileUtils;
     final EncryptionUtils encryptionUtils;
 
-    @Value("${ENCRYPTION_KEY}")
+    @Value("${encryptionKey}")
     String encryptionKey;
 
     @Value("${PATH_TO_ENCRYPTED_STORAGE}")
