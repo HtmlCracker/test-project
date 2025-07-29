@@ -136,10 +136,10 @@ services:
   file-storage-service:
     container_name: file-storage-service
     build: file-storage-service
-    env_file: ./file-storage-service/src/main/resources/application.env
     depends_on:
       - fileStorageDb
       - consul
+      - vault
     ports:
       - 45295:45295
     networks:

@@ -1,0 +1,32 @@
+$VAULT_CONTAINER = "vault"
+$VAULT_TOKEN = "root"
+$VAULT_ADDR = "http://vault:8200"
+
+# Функция для добавления секретов
+function Save-Secret {
+    param(
+        [string]$Path,
+        [hashtable]$Secrets
+    )
+
+    $secretArgs = $Secrets.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }
+    $secretArgs = $secretArgs -join " "
+
+    docker exec $VAULT_CONTAINER `
+        sh -c "VAULT_TOKEN=$VAULT_TOKEN vault kv put secret/$Path $secretArgs"
+}
+
+# Секреты fileStorageDb
+$dbSecrets = @{
+    "DBUrl" = "jdbc:postgresql://fileStorageDb:5432/fileStorageDb"
+    "DBUsername" = "postgres"
+    "DBPassword" = "postgres"
+}
+Save-Secret "database/fileStorageDb" $dbSecrets
+
+# Секреты file-storage-service
+$appSecrets = @{
+    "encryptionKey" = "jjfiu92uf890jggg"
+    "maxFileCountInFolder" = 2
+}
+Save-Secret "services/file-storage-service" $appSecrets
