@@ -54,6 +54,9 @@ public class FileInfoEntity {
     @Column(nullable = false)
     String fileExt;
 
+    @Column(nullable = true)
+    String encryptionKey;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     UploadFileState fileState;

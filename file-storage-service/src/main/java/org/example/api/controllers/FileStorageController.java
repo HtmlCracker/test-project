@@ -70,7 +70,7 @@ public class FileStorageController {
     public ResponseEntity<StreamingResponseBody> getFile(@PathVariable UUID fileId) throws FileNotFoundException {
         FileInfoEntity fileInfoEntity = fileInfoCacheService.getFileEntityById(fileId);
         String originalFileName = fileInfoEntity.getOriginalFileName();
-        String path = fileProcessorService.getFile(fileInfoEntity.getFilePath());
+        String path = fileProcessorService.getFile(fileInfoEntity.getFilePath(), fileInfoEntity.getEncryptionKey());
 
         File file = fileUtils.getFileOrThrowException(path);
 

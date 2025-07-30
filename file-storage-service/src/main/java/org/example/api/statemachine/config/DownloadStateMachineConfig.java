@@ -91,7 +91,8 @@ public class DownloadStateMachineConfig extends StateMachineConfigurerAdapter<Do
     public Action<DownloadFileState, DownloadFileEvent> decryptAction() {
         return context -> {
             String filePath = (String) context.getExtendedState().getVariables().get("filePath");
-            String newPath = fileStorageService.decrypt(filePath);
+            String encryptionKey = (String) context.getExtendedState().getVariables().get("encryptionKey");
+            String newPath = fileStorageService.decrypt(filePath, encryptionKey);
             context.getExtendedState().getVariables().put("filePath", newPath);
         };
     }

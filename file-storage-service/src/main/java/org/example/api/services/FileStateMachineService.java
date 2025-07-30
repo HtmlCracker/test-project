@@ -82,11 +82,12 @@ public class FileStateMachineService {
         stateMachine.stop();
     }
 
-    public String getFile(String filePath) {
+    public String getFile(String filePath, String encryptionKey) {
         StateMachine<DownloadFileState, DownloadFileEvent> stateMachine =
                 downloadStateMachineFactory.getStateMachine();
 
         stateMachine.getExtendedState().getVariables().put("filePath", filePath);
+        stateMachine.getExtendedState().getVariables().put("encryptionKey", encryptionKey);
 
         stateMachine.start();
 

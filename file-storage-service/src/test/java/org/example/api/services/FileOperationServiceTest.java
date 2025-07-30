@@ -308,13 +308,14 @@ public class FileOperationServiceTest {
     void decrypt_shouldOk() {
         String path = "old/path";
         String newPath = "new/path";
+        String encryptionKey = "test";
 
-        when(encryptorService.decryptFileAndWrite(path)).thenReturn(newPath);
+        when(encryptorService.decryptFileAndWrite(path, encryptionKey)).thenReturn(newPath);
         doNothing().when(fileUtils).deleteFile(path);
 
-        String resultPath = fileOperationService.decrypt(path);
+        String resultPath = fileOperationService.decrypt(path, encryptionKey);
 
-        verify(encryptorService).decryptFileAndWrite(path);
+        verify(encryptorService).decryptFileAndWrite(path, encryptionKey);
         verify(fileUtils).deleteFile(path);
 
         assertEquals(newPath, resultPath);

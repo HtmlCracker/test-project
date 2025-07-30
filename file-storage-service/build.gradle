@@ -104,7 +104,8 @@ jacocoTestReport {
                     "**/entities/**",
                     "**/lombok/**",
                     "**/state/**",
-                    "**/Main.class"
+                    "**/Main.class",
+                    "**/VaultTransitService.class"
             ])
         }))
     }

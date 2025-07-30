@@ -9,4 +9,7 @@ spring:
         enabled: true
         backend: secret
         application-name: services/file-storage-service,database/fileStorageDb
+      transit:
+        enabled: true
+        key-name: master-key
       fail-fast: true

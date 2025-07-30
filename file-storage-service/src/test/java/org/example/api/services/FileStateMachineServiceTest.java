@@ -186,15 +186,15 @@ public class FileStateMachineServiceTest {
     @Test
     void downloadFile_shouldSendEventsInOrder() {
         String path = "test/path.path";
+        String encryptionKey = "test";
         ExtendedState extendedState = new DefaultExtendedState(new HashMap<>());
 
         when(downloadStateMachineFactory.getStateMachine()).thenReturn(downloadStateMachine);
         when(downloadStateMachine.getExtendedState()).thenReturn(extendedState);
 
-        fileStateMachineService.getFile(path);
+        fileStateMachineService.getFile(path, encryptionKey);
 
         verify(downloadStateMachine).start();
         verify(downloadStateMachine, atLeastOnce()).getExtendedState();
     }
-
 }

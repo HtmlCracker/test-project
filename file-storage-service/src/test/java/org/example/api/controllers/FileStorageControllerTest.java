@@ -63,7 +63,7 @@ public class FileStorageControllerTest {
     Path tempDir;
 
     @Test
-    void uploadFile_shouldReturnResponseDtoWhenFileValid() throws IOException {
+    void uploadFile_shouldReturnResponseDtoWhenFileValid() {
         MultipartFile mockFile = new MockMultipartFile(
                 "file", "test.txt", "text/plain", "test content".getBytes());
 
@@ -109,6 +109,7 @@ public class FileStorageControllerTest {
         String originalFileName = "test-file.txt";
         String fileContent = "Test file content";
         String filePath = tempDir.resolve("test-file.txt").toString();
+        String encryptionKey = "test";
 
         File testFile = tempDir.resolve("test-file.txt").toFile();
         Files.write(testFile.toPath(), fileContent.getBytes());
@@ -119,7 +120,7 @@ public class FileStorageControllerTest {
         mockEntity.setFilePath(filePath);
 
         when(fileInfoCacheService.getFileEntityById(fileId)).thenReturn(mockEntity);
-        when(fileProcessorService.getFile(filePath)).thenReturn(filePath);
+        when(fileProcessorService.getFile(filePath, null)).thenReturn(filePath);
         when(fileUtils.getFileOrThrowException(filePath)).thenReturn(testFile);
 
         ResponseEntity<StreamingResponseBody> response = fileStorageController.getFile(fileId);
@@ -146,13 +147,14 @@ public class FileStorageControllerTest {
     void getFile_shouldThrowExceptionWhenFileNotFound() {
         UUID fileId = UUID.randomUUID();
         String filePath = "/nonexistent/path";
+        String encryptionKey = "test";
 
         FileInfoEntity mockEntity = new FileInfoEntity();
         mockEntity.setId(fileId);
         mockEntity.setFilePath(filePath);
 
         when(fileInfoCacheService.getFileEntityById(fileId)).thenReturn(mockEntity);
-        when(fileProcessorService.getFile(filePath)).thenReturn(filePath);
+        when(fileProcessorService.getFile(filePath, null)).thenReturn(filePath);
         when(fileUtils.getFileOrThrowException(filePath)).thenThrow(new BadRequestException("File not found"));
 
         assertThrows(BadRequestException.class, () -> {
