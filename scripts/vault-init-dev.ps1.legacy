@@ -2,6 +2,13 @@ $VAULT_CONTAINER = "vault"
 $VAULT_TOKEN = "root"
 $VAULT_ADDR = "http://vault:8200"
 
+docker exec $VAULT_CONTAINER `
+    sh -c "VAULT_TOKEN=$VAULT_TOKEN vault secrets enable transit 2>/dev/null || true"
+
+# Создание master-key для шифрования ключей
+docker exec $VAULT_CONTAINER `
+    sh -c "VAULT_TOKEN=$VAULT_TOKEN vault write -f transit/keys/master-key"
+
 # Функция для добавления секретов
 function Save-Secret {
     param(
