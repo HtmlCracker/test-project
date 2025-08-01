@@ -37,3 +37,10 @@ $appSecrets = @{
     "maxFileCountInFolder" = 2
 }
 Save-Secret "services/file-storage-service" $appSecrets
+
+# Секреты email-service
+$emailServiceSecrets = @{
+    "emailUsername" = "YOUR_EMAIL"
+    "emailPassword" = "YOUR_PASSWORD"
+}
+Save-Secret "services/email-service" $emailServiceSecrets

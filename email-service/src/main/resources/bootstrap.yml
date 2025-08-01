@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: email-sender-service
+  cloud:
+    vault:
+      uri: http://vault:8200
+      token: root
+      kv:
+        enabled: true
+        backend: secret
+        application-name: services/email-sender-service
+      fail-fast: true

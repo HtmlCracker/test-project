@@ -25,8 +25,8 @@ spring:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
   mail:
-    username: ${EMAIL_USERNAME}
-    password: ${EMAIL_PASSWORD}
+    username: ${emailUsername}
+    password: ${emailPassword}
     host: smtp.yandex.ru
     port: 587
     protocol: smtp
