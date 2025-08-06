@@ -177,7 +177,7 @@ services:
     container_name: chatDb
     hostname: chatDb
     ports:
-      - 5438:5438
+      - 5438:5432
     environment:
       POSTGRES_DB: chat_history
       POSTGRES_USER: postgres
@@ -187,6 +187,58 @@ services:
       - ./chatDb:/data
     networks:
       - consul-net
+
+  vault:
+    build: ./vault
+    image: hashicorp/vault:1.15.2
+    container_name: vault
+    environment:
+      VAULT_ADDR: "http://0.0.0.0:8200"
+      VAULT_API_ADDR: "http://vault:8200"
+    ports:
+      - "8200:8200"
+    volumes:
+      - ./vault/config:/vault/config:ro
+      - ./vault/file:/vault/file
+    cap_add:
+      - IPC_LOCK
+    restart: unless-stopped
+    networks:
+      - consul-net
+    depends_on:
+      vault_db:
+        condition: service_healthy
+
+  vault-init:
+    image: hashicorp/vault:1.15.2
+    container_name: vault-init
+    entrypoint: [ "/bin/sh", "/vault/init/init.sh" ]
+    volumes:
+      - ./vault/init:/vault/init:ro
+      - ./vault/policies:/vault/policies:ro
+    networks:
+      - consul-net
+    depends_on:
+      - vault
+    restart: "no"
+
+  vault_db:
+    image: postgres:13
+    container_name: vault_db
+    environment:
+      POSTGRES_DB: vault
+      POSTGRES_USER: vault
+      POSTGRES_PASSWORD: vault
+    volumes:
+      - ./vault/db:/var/lib/postgresql/data
+    networks:
+      - consul-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U vault -d vault" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
 
   consul:
     container_name: consul

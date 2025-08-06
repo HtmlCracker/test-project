@@ -2,11 +2,16 @@ package com.example.chatservice.websocket;
 
 import com.example.chatservice.dto.Message;
 import com.example.chatservice.dto.ReadReceipt;
+import com.example.chatservice.entity.ChatMessage;
 import com.example.chatservice.kafka.KafkaProducer;
 import com.example.chatservice.service.ChatMessageService;
 import com.example.chatservice.state.MessageState;
 import com.example.chatservice.util.JwtUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -16,25 +21,22 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@RequiredArgsConstructor
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
-    private final KafkaProducer kafkaProducer;
     private final ObjectMapper objectMapper;
-    private final KafkaTemplate<UUID, ReadReceipt> readReceiptKafkaTemplate;
+    private final KafkaProducer kafkaProducer;
+    @Lazy
+    private final ChatMessageService chatMessageService;
 
     // Хранение активных сессий по uuid пользователя
     private final Map<UUID, WebSocketSession> sessions = new ConcurrentHashMap<>();
-
-    public ChatWebSocketHandler(KafkaProducer kafkaProducer, ObjectMapper objectMapper, KafkaTemplate<UUID, ReadReceipt> readReceiptKafkaTemplate) {
-        this.kafkaProducer = kafkaProducer;
-        this.objectMapper = objectMapper;
-        this.readReceiptKafkaTemplate = readReceiptKafkaTemplate;
-    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -46,6 +48,12 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         // Сохраняем сессию пользователя
         sessions.put(userId, session);
         session.sendMessage(new TextMessage("Connected as " + userId));
+
+        // Загрузка всех непрочитанных сообщений
+        List<Message> undeliveredMessages = chatMessageService.getUndeliveredMessages(userId);
+        for (Message message : undeliveredMessages) {
+            session.sendMessage(new TextMessage(objectMapper.writeValueAsBytes(message)));
+        }
     }
 
     @Override
@@ -57,7 +65,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             // Парсинг JSON в ReadReceipt
             ReadReceipt readReceipt = parseReadReceipt(payload);
             // В данном случае клиент "читает сообщение", для которого он получатель
-            readReceiptKafkaTemplate.send("read_receipts", senderId, readReceipt);
+            kafkaProducer.sendReadReceipt(readReceipt);
         } else {
             // Парсинг JSON в Message
             Message msg = parseMessage(message.getPayload(), senderId);
@@ -75,8 +83,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
 
     // Метод для отправки сообщения пользователю напрямую из KafkaConsumer
-    public void sendMessageToUser(UUID recipientId, Message message) {
-        WebSocketSession session = sessions.get(recipientId);
+    public void sendMessageToUser(UUID userId, Message message) {
+        WebSocketSession session = sessions.get(userId);
         if (session != null && session.isOpen()) {
             try {
                 session.sendMessage(new TextMessage(objectMapper.writeValueAsBytes(message)));
@@ -86,24 +94,39 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    public void sendReadReceipt(UUID recipientId, UUID messageId) {
-        ReadReceipt receipt = new ReadReceipt();
-        receipt.setMessageId(messageId);
-        receipt.setRecipientId(recipientId);
-        receipt.setTimestamp(LocalDateTime.now());
-
-        readReceiptKafkaTemplate.send("read_receipts", recipientId, receipt);
+    public boolean isUserOnline(UUID userId) {
+        WebSocketSession session = sessions.get(userId);
+        return session != null && session.isOpen();
     }
 
-    private Message parseMessage(String json, UUID senderId) throws IOException {
-        Message message = objectMapper.readValue(json, Message.class);
-        message.setSenderId(senderId);
-        message.setTimestamp(java.time.LocalDateTime.now());
-        return message;
+    //на случай различной логики в дальнейшем
+    public void sendEditNotification(UUID recipientId, Message notification) {
+        sendMessageToUser(recipientId, notification);
     }
 
-    private ReadReceipt parseReadReceipt(String json) throws IOException {
-        ReadReceipt readReceipt = objectMapper.readValue(json, ReadReceipt.class);
-        return readReceipt;
+    public void sendParticipantNotification(UUID recipientId, Message notification) {
+        sendMessageToUser(recipientId, notification);
+    }
+
+    private Message parseMessage(String json, UUID senderId) {
+        try {
+            Message message = objectMapper.readValue(json, Message.class);
+            message.setSenderId(senderId);
+            message.setTimestamp(java.time.LocalDateTime.now());
+            return message;
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Invalid message format", e);
+        }
+    }
+
+    private ReadReceipt parseReadReceipt(String payload) {
+        try {
+
+            String json = payload.replaceFirst("read_receipt:", "").trim();
+            ReadReceipt readReceipt = objectMapper.readValue(json, ReadReceipt.class);
+            return readReceipt;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid read receipt", e);
+        }
     }
 }

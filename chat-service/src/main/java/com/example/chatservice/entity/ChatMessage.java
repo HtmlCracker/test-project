@@ -22,8 +22,8 @@ public class ChatMessage {
     @Column(name = "sender_id")
     private UUID senderId;
 
-    @Column(name = "recipient_id")
-    private UUID recipientId;
+    @Column(name = "chat_id")
+    private UUID chatId;
 
     @Column(name = "text")
     private String text;

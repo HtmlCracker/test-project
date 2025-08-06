@@ -1,9 +1,18 @@
 spring:
   application:
     name: chat-service
-server:
-  port: 8889
+  datasource:
+    url: jdbc:postgresql://chatDb:5432/chat_history
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
 
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
   kafka:
     bootstrap-servers: kafka:29092
     producer:
@@ -13,6 +22,7 @@ server:
       key-deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: earliest
+      enable-auto-commit: false
 
   cloud:
     consul:
@@ -21,6 +31,8 @@ server:
       discovery:
         health-check-path: /actuator/health
         prefer-ip-address: true
+server:
+  port: 8081
 
 feign:
   client:
@@ -33,16 +45,9 @@ feign:
     max-binary-message-size: 131072  # Максимальный размер бинарного сообщения (128 KB)
     buffer-size: 131072  # Размер буфера (128 KB)
     time-to-close-session: 30000  # Таймаут закрытия сессии (30 секунд)
-
-  datasource:
-    url: jdbc:postgresql://chatDb:5438/chat_history
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
+logging:
+  level:
+    org.springframework.data.repository: DEBUG
+    org.springframework.data.jpa: DEBUG
+    org.springframework.beans: TRACE
+    com.example.chatservice: DEBUG

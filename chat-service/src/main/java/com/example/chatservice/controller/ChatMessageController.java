@@ -23,15 +23,18 @@ public class ChatMessageController {
         this.jwtUtil = jwtUtil;
     }
 
-    @GetMapping("/history/{recipientId}")
-    public ResponseEntity<Page<Message>> history(@PathVariable UUID recipientId, @RequestHeader("Authorization") String authHeader,
-                                                 @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "50") int size) {
+    @GetMapping("/history/{chatId}")
+    public ResponseEntity<Page<Message>> getChatHistory(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable UUID chatId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
         String token = authHeader.substring(7);
         UUID senderId = jwtUtil.extractUserId(token);
-        if (recipientId == null) {
+        if (chatId == null) {
             return ResponseEntity.badRequest().build();
         }
-        Page<Message> history = chatMessageService.getChatHistory(senderId, recipientId, page, size);
+        Page<Message> history = chatMessageService.getChatHistory(senderId, chatId, page, size);
         return ResponseEntity.ok(history);
     }
 

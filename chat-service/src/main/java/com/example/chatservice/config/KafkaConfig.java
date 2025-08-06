@@ -16,6 +16,7 @@ import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
+import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
@@ -29,7 +30,7 @@ public class KafkaConfig {
 
     //Producer Config
     @Bean
-    public ProducerFactory<UUID, Message> producerFactory() {
+    public ProducerFactory<UUID, Message> messageProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092");
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, UUIDSerializer.class);
@@ -47,18 +48,18 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaTemplate<UUID, Message> kafkaTemplate(ProducerFactory<UUID, Message> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
+    public KafkaTemplate<UUID, Message> messageKafkaTemplate() {
+        return new KafkaTemplate<>(messageProducerFactory());
     }
 
     @Bean
-    public KafkaTemplate<UUID, ReadReceipt> kafkaReadReceiptTemplate(ProducerFactory<UUID, ReadReceipt> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
+    public KafkaTemplate<UUID, ReadReceipt> readReceiptKafkaTemplate() {
+        return new KafkaTemplate<>(readReceiptProducerFactory());
     }
 
     //Consumer Config
     @Bean
-    public ConsumerFactory<UUID, Message> consumerFactory() {
+    public ConsumerFactory<UUID, Message> messageConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "chat-group");
@@ -66,6 +67,8 @@ public class KafkaConfig {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, Message.class);
+        // на случай если кафка будет мозги парить
+        //configProps.put(JsonDeserializer.VALUE_DEFAULT_TYPE, Message.class);
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
@@ -82,20 +85,21 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaListenerContainerFactory<?  extends AbstractMessageListenerContainer<UUID, Message>> kafkaListenerContainerFactory(ConsumerFactory<UUID, Message> consumerFactory) {
+    public KafkaListenerContainerFactory<?  extends AbstractMessageListenerContainer<UUID, Message>> messageKafkaListenerFactory() {
         ConcurrentKafkaListenerContainerFactory<UUID, Message> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory);
+        factory.setConsumerFactory(messageConsumerFactory());
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         factory.setConcurrency(3);
         return factory;
     }
 
     @Bean
-    public KafkaListenerContainerFactory<? extends AbstractMessageListenerContainer<UUID, ReadReceipt>> readReceiptKafkaListenerFactory(
-            ConsumerFactory<UUID, ReadReceipt> consumerFactory) {
+    public KafkaListenerContainerFactory<? extends AbstractMessageListenerContainer<UUID, ReadReceipt>> readReceiptKafkaListenerFactory() {
         ConcurrentKafkaListenerContainerFactory<UUID, ReadReceipt> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory);
+        factory.setConsumerFactory(readReceiptConsumerFactory());
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         factory.setConcurrency(3);
         return factory;
     }

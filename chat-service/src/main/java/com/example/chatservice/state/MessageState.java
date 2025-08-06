@@ -1,5 +1,5 @@
 package com.example.chatservice.state;
 
 public enum MessageState {
-    SENT, DELIVERED, READ, FAILED
+    SENT, DELIVERED, FAILED
 }
