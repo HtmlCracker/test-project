@@ -64,6 +64,15 @@ jacoco {
     reportsDirectory = layout.buildDirectory.dir("jacocoReports")
 }
 
+// Spring cloud vault
+dependencies {
+    implementation 'org.springframework.cloud:spring-cloud-starter-vault-config'
+}
+
+dependencies {
+    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+}
+
 test {
     finalizedBy jacocoTestReport
 }

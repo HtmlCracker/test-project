@@ -44,3 +44,11 @@ $emailServiceSecrets = @{
     "emailPassword" = "YOUR_PASSWORD"
 }
 Save-Secret "services/email-service" $emailServiceSecrets
+
+# Секреты profileDb
+$profileDbSecrets = @{
+    "DBUrl" = "jdbc:postgresql://profileDb:5432/profileDb"
+    "DBUsername" = "postgres"
+    "DBPassword" = "postgres"
+}
+Save-Secret "database/profileDb" $profileDbSecrets

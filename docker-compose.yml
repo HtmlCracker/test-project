@@ -107,7 +107,6 @@ services:
   profile-service:
     container_name: profile-service
     build: profile-service
-    env_file: ./profile-service/src/main/resources/application.env
     depends_on:
       - profileDb
       - consul
