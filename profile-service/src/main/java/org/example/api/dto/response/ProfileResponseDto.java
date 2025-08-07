@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,6 +23,10 @@ public class ProfileResponseDto {
 
     @NonNull
     String name;
+
+    String phoneNumber;
+
+    LocalDate birthDate;
 
     String surname;
 
