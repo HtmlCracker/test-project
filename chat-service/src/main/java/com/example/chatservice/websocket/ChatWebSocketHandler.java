@@ -32,7 +32,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     private final ObjectMapper objectMapper;
     private final KafkaProducer kafkaProducer;
-    @Lazy
     private final ChatMessageService chatMessageService;
 
     // Хранение активных сессий по uuid пользователя
@@ -42,7 +41,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         UUID userId = (UUID) session.getAttributes().get("userId");
         if (userId == null) {
-            session.close();
+            session.close(CloseStatus.NOT_ACCEPTABLE.withReason("Missing userId in session attributes"));
             return;
         }
         // Сохраняем сессию пользователя
@@ -50,25 +49,26 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         session.sendMessage(new TextMessage("Connected as " + userId));
 
         // Загрузка всех непрочитанных сообщений
-        List<Message> undeliveredMessages = chatMessageService.getUndeliveredMessages(userId);
-        for (Message message : undeliveredMessages) {
+        List<Message> unreadMessages = chatMessageService.getUnreadMessages(userId);
+        for (Message message : unreadMessages) {
             session.sendMessage(new TextMessage(objectMapper.writeValueAsBytes(message)));
+            chatMessageService.markAsRead(message.getMessageId(), userId);
         }
     }
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
-        UUID senderId = (UUID) session.getAttributes().get("userId");
+        UUID userId = (UUID) session.getAttributes().get("userId");
 
         if (payload.equals("read_receipt:")) {
             // Парсинг JSON в ReadReceipt
-            ReadReceipt readReceipt = parseReadReceipt(payload);
+            ReadReceipt readReceipt = parseReadReceipt(payload, userId);
             // В данном случае клиент "читает сообщение", для которого он получатель
             kafkaProducer.sendReadReceipt(readReceipt);
         } else {
             // Парсинг JSON в Message
-            Message msg = parseMessage(message.getPayload(), senderId);
+            Message msg = parseMessage(message.getPayload(), userId);
             // Отправка сообщения через Kafka
             kafkaProducer.sendMessage(msg);
         }
@@ -88,8 +88,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         if (session != null && session.isOpen()) {
             try {
                 session.sendMessage(new TextMessage(objectMapper.writeValueAsBytes(message)));
+                chatMessageService.markAsDelivered(message.getMessageId());
             } catch (IOException e) {
-                message.setStatus(MessageState.FAILED);
+                chatMessageService.markAsFailed(message.getMessageId());
             }
         }
     }
@@ -119,11 +120,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private ReadReceipt parseReadReceipt(String payload) {
+    private ReadReceipt parseReadReceipt(String payload, UUID userId) {
         try {
-
             String json = payload.replaceFirst("read_receipt:", "").trim();
             ReadReceipt readReceipt = objectMapper.readValue(json, ReadReceipt.class);
+            readReceipt.setRecipientId(userId);
             return readReceipt;
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid read receipt", e);

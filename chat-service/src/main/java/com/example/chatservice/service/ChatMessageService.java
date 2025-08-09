@@ -253,13 +253,13 @@ public class ChatMessageService {
                 .orElseThrow(() -> new IllegalArgumentException("Message not found"));
     }
 
-    public List<Message> getUndeliveredMessages(UUID userId) {
+    public List<Message> getUnreadMessages(UUID userId) {
         //todo сделать с момента когда последний раз был онлайн
-        //вообще эта хуйня с онлайном должна быть в profile-service, но я хз как это сделать
+        //вообще эта х***я с онлайном должна быть в profile-service, но я хз как это сделать
         //господи боже помоги!!!
         LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
 
-        return chatMessageRepository.findUndeliveredMessagesForUser(userId, twentyFourHoursAgo).stream().map(this::toMessage).collect(Collectors.toList());
+        return chatMessageRepository.findUnreadMessagesForUser(userId, twentyFourHoursAgo).stream().map(this::toMessage).collect(Collectors.toList());
     }
 
     private ChatMessage toChatMessage(Message message) {
