@@ -7,6 +7,7 @@ import org.example.api.statemachine.state.download.DownloadFileEvent;
 import org.example.api.statemachine.state.download.DownloadFileState;
 import org.example.api.statemachine.state.upload.UploadFileEvent;
 import org.example.api.statemachine.state.upload.UploadFileState;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.statemachine.ExtendedState;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineFactory;
@@ -16,9 +17,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class FileStateMachineService {
+    @Autowired
     StateMachineFactory<UploadFileState, UploadFileEvent> uploadStateMachineFactory;
+    @Autowired
     StateMachineFactory<DownloadFileState, DownloadFileEvent> downloadStateMachineFactory;
 
     public void resortingUploadState(String fileId, UploadFileState currentState) {
@@ -29,7 +32,7 @@ public class FileStateMachineService {
         stateMachine.start();
 
         try {
-            if (currentState == UploadFileState.STORED) {
+            if (currentState.next() == null) {
                 return;
             }
 
@@ -47,7 +50,7 @@ public class FileStateMachineService {
                     });
 
             UploadFileState state = currentState;
-            while (state != null && state != UploadFileState.STORED) {
+            while (state.next() != null) {
                 UploadFileEvent event = getEventForState(state);
                 stateMachine.sendEvent(event);
                 state = state.next();
@@ -79,11 +82,12 @@ public class FileStateMachineService {
         stateMachine.stop();
     }
 
-    public String getFile(String filePath) {
+    public String getFile(String filePath, String encryptionKey) {
         StateMachine<DownloadFileState, DownloadFileEvent> stateMachine =
                 downloadStateMachineFactory.getStateMachine();
 
         stateMachine.getExtendedState().getVariables().put("filePath", filePath);
+        stateMachine.getExtendedState().getVariables().put("encryptionKey", encryptionKey);
 
         stateMachine.start();
 

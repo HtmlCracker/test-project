@@ -15,10 +15,12 @@ PATH_TO_READY_FOR_GET_STORAGE: /files/get/ready-for-get-storage
 
 compression:
   text-type: text
-
   binary-type: application
 
 spring:
+  application:
+    name: file-storage-service
+
   cache:
     type: caffeine
     caffeine:
@@ -30,13 +32,10 @@ spring:
       max-file-size: 300MB
       max-request-size: 315MB
 
-  application:
-    name: file-storage-service
-
   datasource:
-    url: jdbc:postgresql://fileStorageDb:5432/fileStorageDb
-    username: ${USERNAME}
-    password: ${PASSWORD}
+    url: ${DBUrl}
+    username: ${DBUsername}
+    password: ${DBPassword}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -45,6 +44,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+
+  config:
+    import: vault://
 
   cloud:
     consul:

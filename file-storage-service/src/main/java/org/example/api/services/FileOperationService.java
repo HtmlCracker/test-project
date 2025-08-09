@@ -48,6 +48,12 @@ public class FileOperationService {
     FileUtils fileUtils;
 
     @Transactional
+    public String getFileMimeType(String fileId) {
+        UUID uuid = UUID.fromString(fileId);
+        return fileInfoCacheService.getFileEntityById(uuid).getMimeType();
+    }
+
+    @Transactional
     public void compress(String id) {
         UUID fileId = UUID.fromString(id);
         FileInfoEntity entity = fileInfoCacheService.getFileEntityById(fileId);
@@ -68,7 +74,7 @@ public class FileOperationService {
         EncryptedFileDto dto = encryptorService.encryptFileAndWrite(path);
         String newPath = dto.getPath();
         deleteSourceAfterProcessing(path);
-        updateFileInfoEntity(path, newPath, dto.getEncryptedSize(), UploadFileState.ENCRYPTED);
+        updateFileInfoEntity(path, newPath, dto.getEncryptionKey(), dto.getEncryptedSize(), UploadFileState.ENCRYPTED);
     }
 
     @Transactional
@@ -106,8 +112,8 @@ public class FileOperationService {
         return fileUtils.moveFileTo(path, preparedForGetStoragePath + "/" + fileName);
     }
 
-    public String decrypt(String path) {
-        String newPath = encryptorService.decryptFileAndWrite(path);
+    public String decrypt(String path, String encryptionKey) {
+        String newPath = encryptorService.decryptFileAndWrite(path, encryptionKey);
 
         deleteSourceAfterProcessing(path);
         return newPath;
@@ -136,6 +142,20 @@ public class FileOperationService {
 
         fileInfoEntity.setFilePath(newPath);
         fileInfoEntity.setCurrentSize(newSize);
+        fileInfoEntity.setFileState(fileState);
+        return fileInfoCacheService.saveFileInfoEntity(fileInfoEntity);
+    }
+
+    private FileInfoEntity updateFileInfoEntity(String path,
+                                                String newPath,
+                                                String encryptionKey,
+                                                Long encryptedSize,
+                                                UploadFileState fileState) {
+        FileInfoEntity fileInfoEntity = fileInfoCacheService.getFileEntityByPath(path);
+
+        fileInfoEntity.setFilePath(newPath);
+        fileInfoEntity.setEncryptionKey(encryptionKey);
+        fileInfoEntity.setCurrentSize(encryptedSize);
         fileInfoEntity.setFileState(fileState);
         return fileInfoCacheService.saveFileInfoEntity(fileInfoEntity);
     }

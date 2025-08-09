@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
@@ -23,16 +24,26 @@ public class ProfileEntity {
     @GeneratedValue(strategy = GenerationType.UUID) //todo взять из jwt
     UUID id;
 
+    @Column(nullable = false)
     String email;
 
+    @Column(nullable = false)
     String name;
 
+    @Column(nullable = false)
+    String surname;
+
     @Builder.Default
-    String surname = null;
+    String phoneNumber = null;
+
+    @Column(name = "birth_date")
+    @Builder.Default
+    private LocalDate birthDate = null;
 
     @Builder.Default
     String description = null;
 
+    @Column(nullable = false)
     List<String> roles;
 
     @Builder.Default

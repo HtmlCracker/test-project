@@ -49,7 +49,13 @@ public class FileInfoEntity {
     String filePath;
 
     @Column(nullable = false)
+    String mimeType;
+
+    @Column(nullable = false)
     String fileExt;
+
+    @Column(nullable = true)
+    String encryptionKey;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

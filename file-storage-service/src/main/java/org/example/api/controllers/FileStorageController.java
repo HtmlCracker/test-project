@@ -45,13 +45,9 @@ public class FileStorageController {
     FileOperationService fileStorageService;
     FileUtils fileUtils;
 
-
-    FileInfoRepository fileInfoRepository;
-
     public static final String UPLOAD_FILE = "api/private/file-storage/upload";
     public static final String DELETE_FILE = "api/private/file-storage/delete/{fileId}";
     public static final String GET_FILE = "api/private/file-storage/get/{fileId}";
-    public static final String TEST = "api/private/file-storage/test";
 
     @PostMapping(UPLOAD_FILE)
     public UploadFileResponseDto uploadFile(@RequestParam("file") MultipartFile file) {
@@ -74,7 +70,7 @@ public class FileStorageController {
     public ResponseEntity<StreamingResponseBody> getFile(@PathVariable UUID fileId) throws FileNotFoundException {
         FileInfoEntity fileInfoEntity = fileInfoCacheService.getFileEntityById(fileId);
         String originalFileName = fileInfoEntity.getOriginalFileName();
-        String path = fileProcessorService.getFile(fileInfoEntity.getFilePath());
+        String path = fileProcessorService.getFile(fileInfoEntity.getFilePath(), fileInfoEntity.getEncryptionKey());
 
         File file = fileUtils.getFileOrThrowException(path);
 
@@ -105,10 +101,5 @@ public class FileStorageController {
                 .contentLength(file.length())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(responseBody);
-    }
-
-    @GetMapping(TEST)
-    public List<FileInfoEntity> getAll() {
-        return fileInfoRepository.findAll();
     }
 }

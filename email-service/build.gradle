@@ -57,6 +57,15 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok:1.18.30"
 }
 
+// Spring cloud vault
+dependencies {
+    implementation 'org.springframework.cloud:spring-cloud-starter-vault-config'
+}
+
+dependencies {
+    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+}
+
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'

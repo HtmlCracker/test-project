@@ -24,7 +24,6 @@ import java.util.UUID;
 public class ProfileService {
     ProfileRepository profileRepository;
 
-
     public ProfileEntity registerProfile(ProfileRegistrationRequestDto dto) {
         throwExceptionIfProfileWithEmailAlreadyExists(dto.getEmail());
         ProfileEntity profileEntity = buildProfileEntity(dto);
@@ -43,7 +42,6 @@ public class ProfileService {
                 .email(dto.getEmail())
                 .name(dto.getName())
                 .surname(dto.getSurname())
-                .description(dto.getDescription())
                 .roles(getRolesListByString(dto.getRoles()))
                 .build();
     }

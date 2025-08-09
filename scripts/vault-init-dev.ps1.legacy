@@ -1,0 +1,54 @@
+$VAULT_CONTAINER = "vault"
+$VAULT_TOKEN = "root"
+$VAULT_ADDR = "http://vault:8200"
+
+docker exec $VAULT_CONTAINER `
+    sh -c "VAULT_TOKEN=$VAULT_TOKEN vault secrets enable transit 2>/dev/null || true"
+
+# Создание master-key для шифрования ключей
+docker exec $VAULT_CONTAINER `
+    sh -c "VAULT_TOKEN=$VAULT_TOKEN vault write -f transit/keys/master-key"
+
+# Функция для добавления секретов
+function Save-Secret {
+    param(
+        [string]$Path,
+        [hashtable]$Secrets
+    )
+
+    $secretArgs = $Secrets.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }
+    $secretArgs = $secretArgs -join " "
+
+    docker exec $VAULT_CONTAINER `
+        sh -c "VAULT_TOKEN=$VAULT_TOKEN vault kv put secret/$Path $secretArgs"
+}
+
+# Секреты fileStorageDb
+$dbSecrets = @{
+    "DBUrl" = "jdbc:postgresql://fileStorageDb:5432/fileStorageDb"
+    "DBUsername" = "postgres"
+    "DBPassword" = "postgres"
+}
+Save-Secret "database/fileStorageDb" $dbSecrets
+
+# Секреты file-storage-service
+$appSecrets = @{
+    "encryptionKey" = "jjfiu92uf890jggg"
+    "maxFileCountInFolder" = 2
+}
+Save-Secret "services/file-storage-service" $appSecrets
+
+# Секреты email-service
+$emailServiceSecrets = @{
+    "emailUsername" = "YOUR_EMAIL"
+    "emailPassword" = "YOUR_PASSWORD"
+}
+Save-Secret "services/email-service" $emailServiceSecrets
+
+# Секреты profileDb
+$profileDbSecrets = @{
+    "DBUrl" = "jdbc:postgresql://profileDb:5432/profileDb"
+    "DBUsername" = "postgres"
+    "DBPassword" = "postgres"
+}
+Save-Secret "database/profileDb" $profileDbSecrets

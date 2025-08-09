@@ -20,7 +20,7 @@ import java.util.Random;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class FolderService {
-    @Value("${MAX_FILE_COUNT_IN_FOLDER:500}")
+    @Value("${maxFileCountInFolder}")
     int maxFileCount;
     final FileUtils fileUtils;
     final FolderRepository folderRepository;

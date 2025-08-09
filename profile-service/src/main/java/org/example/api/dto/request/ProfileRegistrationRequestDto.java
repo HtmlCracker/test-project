@@ -1,6 +1,5 @@
 package org.example.api.dto.request;
 
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -18,11 +17,14 @@ public class ProfileRegistrationRequestDto {
     String email;
 
     @NotBlank(message = "Name can't be empty")
+    @NotNull
     String name;
 
+    @NotBlank(message = "Surname can't be empty")
+    @NotNull
     String surname;
 
-    String description;
-
+    @NotBlank(message = "Roles can't be empty")
+    @NotNull
     String roles;
 }

@@ -11,6 +11,8 @@ public class ProfileDtoFactory {
                 .id(entity.getId())
                 .email(entity.getEmail())
                 .name(entity.getName())
+                .phoneNumber(entity.getPhoneNumber())
+                .birthDate(entity.getBirthDate())
                 .surname(entity.getSurname())
                 .description(entity.getDescription())
                 .roles(entity.getRoles())

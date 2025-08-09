@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
+
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
@@ -34,11 +36,13 @@ public class TemporaryStorageService {
                                               String fileHash,
                                               String filePath) {
         String origFileName = file.getOriginalFilename();
+        String mimeType = fileUtils.getFileMime(file);
         String fileExt = fileUtils.getFileExtension(origFileName);
 
         return FileInfoEntity.builder()
                 .originalFileName(origFileName)
                 .originalFileSize(file.getSize())
+                .mimeType(mimeType)
                 .fileExt(fileExt)
                 .fileState(UploadFileState.UPLOADED)
                 .fileHash(fileHash)

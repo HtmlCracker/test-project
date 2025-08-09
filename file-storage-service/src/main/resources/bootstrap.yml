@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: file-storage-service
+  cloud:
+    vault:
+      uri: http://vault:8200
+      token: root
+      kv:
+        enabled: true
+        backend: secret
+        application-name: services/file-storage-service,database/fileStorageDb
+      transit:
+        enabled: true
+        key-name: master-key
+      fail-fast: true
