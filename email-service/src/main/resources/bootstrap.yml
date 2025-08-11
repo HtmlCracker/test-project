@@ -8,5 +8,5 @@ spring:
       kv:
         enabled: true
         backend: secret
-        application-name: services/email-sender-service
+        application-name: services/email-service
       fail-fast: true
