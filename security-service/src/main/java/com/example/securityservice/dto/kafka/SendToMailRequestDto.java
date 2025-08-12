@@ -1,4 +1,4 @@
-package com.example.securityservice.dto;
+package com.example.securityservice.dto.kafka;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

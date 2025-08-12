@@ -1,6 +1,6 @@
 package com.example.securityservice.service;
 
-import com.example.securityservice.dto.SendToMailRequestDto;
+import com.example.securityservice.dto.kafka.SendToMailRequestDto;
 import com.example.securityservice.entity.EmailVerifyEntity;
 import com.example.securityservice.exception.BadRequestException;
 import com.example.securityservice.repository.EmailVerifyRepository;

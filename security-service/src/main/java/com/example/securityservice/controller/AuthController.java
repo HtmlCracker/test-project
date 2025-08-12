@@ -2,6 +2,7 @@ package com.example.securityservice.controller;
 
 import com.example.securityservice.dto.ResetPasswordRequestDto;
 import com.example.securityservice.dto.UserRequestDto;
+import com.example.securityservice.dto.kafka.AccountDeletedDto;
 import com.example.securityservice.entity.User;
 import com.example.securityservice.service.*;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -13,6 +14,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -21,7 +25,6 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final EmailVerifyService emailVerifyService;
     private final AuthenticationManager authenticationManager;
-
     private final ProducerService producerService;
 
     @Autowired
@@ -63,7 +66,14 @@ public class AuthController {
 
     @DeleteMapping("/delete")
     public String delete(@RequestHeader("Authorization") String authHeader) {
-        return userService.delete(userService.findByEmail(jwtService.extractEmail(authHeader.substring(7))).orElseThrow(()->new EntityNotFoundException("User not found")));
+        User user = userService.findByEmail(jwtService.extractEmail(authHeader.substring(7))).orElseThrow(()->new EntityNotFoundException("User not found"));
+        String response = userService.delete(user);
+        AccountDeletedDto accountDeletedDto = AccountDeletedDto.builder()
+                .accountId(user.getId())
+                .time(Instant.now())
+                .build();
+        producerService.sendDeletedAccountMessage(accountDeletedDto);
+        return response;
     }
 
     @PostMapping("/token")
@@ -87,7 +97,6 @@ public class AuthController {
         return refreshTokenService.refreshJwt(token);
     }
 
-    @SuppressWarnings("checkstyle:NeedBraces")
     @GetMapping("/validate")
     public String isTokenValid(@RequestParam("token") String token) {
         try {
