@@ -22,6 +22,9 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private RefreshToken refreshToken;
+
     @Column(name = "createdAt")
     private LocalDateTime createdAt;
 
@@ -72,6 +75,14 @@ public class User implements UserDetails {
 
     public void setEnabled(boolean enabled) {
         isEnabled = enabled;
+    }
+
+    public RefreshToken getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(RefreshToken refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     @Override

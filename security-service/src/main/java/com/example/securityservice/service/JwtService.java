@@ -19,12 +19,14 @@ public class JwtService {
     @Value("${jwt_secret}")
     private String SECRET_KEY;
 
-    public String generateToken(User user){
+    public String generateToken(User user) {
         return Jwts
                 .builder()
                 .setSubject(user.getEmail())
+                .claim("userId", user.getId().toString())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1_800_000))
+                .setIssuer("SecurityService")
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -34,22 +36,27 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails){
+    public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = extractEmail(token);
         return username.equals(userDetails.getUsername())
-                && extractClaim(token, Claims::getExpiration).after(new Date(System.currentTimeMillis()));
+                && extractClaim(token, Claims::getExpiration).after(new Date(System.currentTimeMillis()))
+                && "SecurityService".equals(extractClaim(token, Claims::getIssuer));
     }
 
-    public String extractEmail(String token){
+    public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver){
+    public String extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", String.class));
+    }
+
+    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token){
+    private Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
                 .setSigningKey(getSignInKey())

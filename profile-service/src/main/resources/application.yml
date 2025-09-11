@@ -1,6 +1,17 @@
 server:
   port: 45291
 
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    com.example: ERROR
+  file:
+    name: /app/logs/profile-service.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
 spring:
   application:
     name: profile-service
@@ -17,6 +28,14 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+
+  kafka:
+    consumer:
+      bootstrap-servers: kafka:29092
+      group-id: group_id
+      auto-offset-reset: earliest
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
   cloud:
     consul:

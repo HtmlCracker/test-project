@@ -39,16 +39,16 @@ public class UserService {
         this.passwordResetRepository = passwordResetRepository;
     }
 
-    public List<User> findAll(){
+    public List<User> findAll() {
         return userRepository.findAll();
     }
 
-    public Optional<User> findByEmail(String email){
+    public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
     @Transactional
-    public String save(UserRequestDto userRequestDto){
+    public String save(UserRequestDto userRequestDto) {
         if (userRepository.findByEmail(userRequestDto.getEmail()).isPresent())
             return "This email has already registered";
         User user = new User(
@@ -57,7 +57,6 @@ public class UserService {
                 LocalDateTime.now(),
                 false);
         emailVerifyService.sendVerifyToken(userRequestDto.getEmail());
-        userRepository.save(user);
         return "User has been registered";
     }
 
@@ -75,7 +74,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(userUpd.getPassword()));
         user.setEmail(userUpd.getEmail());
 
-        if (user.getEmail().equals(userUpd.getEmail())){
+        if (user.getEmail().equals(userUpd.getEmail())) {
             userRepository.save(user);
             return "User has been updated";
         }
@@ -87,8 +86,12 @@ public class UserService {
         return "User has been updated. Please, confirm your email with new activation code we sent you";
     }
 
+    public void deleteUserById(UUID id) {
+        userRepository.deleteById(id);
+    }
+
     @Transactional
-    public String delete(User user){
+    public String delete(User user) {
         userRepository.delete(user);
         return "User has been deleted";
     }

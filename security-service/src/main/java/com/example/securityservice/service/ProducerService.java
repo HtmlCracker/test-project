@@ -1,6 +1,5 @@
 package com.example.securityservice.service;
 
-import ch.qos.logback.core.rolling.SizeAndTimeBasedFileNamingAndTriggeringPolicy;
 import com.example.securityservice.dto.kafka.AccountDeletedDto;
 import com.example.securityservice.dto.kafka.SendToMailRequestDto;
 import com.example.securityservice.exception.BadRequestException;

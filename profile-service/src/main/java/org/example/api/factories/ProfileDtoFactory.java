@@ -9,7 +9,6 @@ public class ProfileDtoFactory {
     public ProfileResponseDto makeProfileDto(ProfileEntity entity) {
         return ProfileResponseDto.builder()
                 .id(entity.getId())
-                .email(entity.getEmail())
                 .name(entity.getName())
                 .phoneNumber(entity.getPhoneNumber())
                 .birthDate(entity.getBirthDate())

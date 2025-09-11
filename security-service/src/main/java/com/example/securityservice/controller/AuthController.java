@@ -66,13 +66,16 @@ public class AuthController {
 
     @DeleteMapping("/delete")
     public String delete(@RequestHeader("Authorization") String authHeader) {
-        User user = userService.findByEmail(jwtService.extractEmail(authHeader.substring(7))).orElseThrow(()->new EntityNotFoundException("User not found"));
-        String response = userService.delete(user);
+        UUID id = UUID.fromString(jwtService.extractUserId(authHeader.substring(7)));
+
         AccountDeletedDto accountDeletedDto = AccountDeletedDto.builder()
-                .accountId(user.getId())
-                .time(Instant.now())
+                .accountId(id)
+                .time(Instant.now().toString())
                 .build();
+
         producerService.sendDeletedAccountMessage(accountDeletedDto);
+        userService.deleteUserById(id);
+        String response = String.format("User with id: %s was deleted.", id);
         return response;
     }
 

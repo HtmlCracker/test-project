@@ -14,6 +14,15 @@ import java.util.Map;
 @Slf4j
 @ControllerAdvice
 public class CustomExceptionHandler {
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<Object> handleJwtException (JwtException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorDto.builder()
+                        .error("JwtException")
+                        .errorDescription(ex.getMessage())
+                        .build());
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleNotFoundException(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)

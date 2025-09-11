@@ -19,9 +19,6 @@ public class ProfileResponseDto {
     UUID id;
 
     @NonNull
-    String email;
-
-    @NonNull
     String name;
 
     String phoneNumber;

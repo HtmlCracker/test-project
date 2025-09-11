@@ -35,17 +35,16 @@ public class ProfileServiceTest {
         UUID id = UUID.randomUUID();
 
         ProfileRegistrationRequestDto dto = ProfileRegistrationRequestDto.builder()
-                .email("test@test.test")
                 .name("test")
                 .roles("test")
                 .build();
 
         ProfileEntity profile = ProfileEntity.builder().build();
 
-        when(profileRepository.findByEmail(dto.getEmail()))
+        when(profileRepository.findById(id))
                 .thenReturn(Optional.of(profile));
 
-        assertThrows(BadRequestException.class, () -> profileService.registerProfile(dto));
+        assertThrows(BadRequestException.class, () -> profileService.registerProfile(id, dto));
     }
 
     @Test
@@ -55,31 +54,28 @@ public class ProfileServiceTest {
         List<String> roles = List.of("ROLE_USER", "ROLE_ADMIN");
 
         ProfileRegistrationRequestDto dto = ProfileRegistrationRequestDto.builder()
-                .email("test@test.test")
                 .name("test")
                 .roles("ROLE_USER,ROLE_ADMIN")
                 .build();
 
         ProfileEntity profile = ProfileEntity.builder()
                 .id(id)
-                .email(dto.getEmail())
                 .name(dto.getName())
                 .roles(roles)
                 .build();
 
-        when(profileRepository.findByEmail(dto.getEmail()))
+        when(profileRepository.findById(id))
                 .thenReturn(Optional.empty());
         when(profileRepository.save(any(ProfileEntity.class)))
                 .thenReturn(profile);
 
-        assertEquals(profileService.registerProfile(dto), profile);
+        assertEquals(profileService.registerProfile(id, dto), profile);
     }
 
     @Test
     void updateProfile_shouldThrowNotFoundException() {
         UUID id = UUID.randomUUID();
         ProfileUpdateRequestDto dto = ProfileUpdateRequestDto.builder()
-                .email("test@test.test")
                 .name("test")
                 .roles("test")
                 .build();
@@ -96,20 +92,17 @@ public class ProfileServiceTest {
         List<String> roles = List.of("newTest");
 
         ProfileUpdateRequestDto dto = ProfileUpdateRequestDto.builder()
-                .email("test@test.test")
                 .name("newTest")
                 .roles("newRole")
                 .build();
 
         ProfileEntity profile = ProfileEntity.builder()
                 .id(id)
-                .email(dto.getEmail())
                 .name("oldTest")
                 .build();
 
         ProfileEntity updatedProfile = ProfileEntity.builder()
                 .id(id)
-                .email(dto.getEmail())
                 .name("newTest")
                 .roles(roles)
                 .build();
@@ -127,7 +120,6 @@ public class ProfileServiceTest {
 
         ProfileEntity savedProfile = profileCaptor.getValue();
 
-        assertEquals(updatedProfile.getEmail(), savedProfile.getEmail());
         assertEquals(updatedProfile.getName(), savedProfile.getName());
         assertEquals(updatedProfile.getRoles(), roles);
 

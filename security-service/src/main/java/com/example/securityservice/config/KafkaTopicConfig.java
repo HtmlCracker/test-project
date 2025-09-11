@@ -23,7 +23,7 @@ public class KafkaTopicConfig {
     public NewTopic topic1() {
         return TopicBuilder.name("security-service-account-delete-v1-group")
                 .partitions(3)
-                .replicas(2)
+                .replicas(1)
                 .build();
     }
 }

@@ -21,11 +21,7 @@ import java.util.UUID;
 @Table(name = "profile")
 public class ProfileEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
-
-    @Column(nullable = false)
-    String email;
 
     @Column(nullable = false)
     String name;

@@ -3,6 +3,7 @@ package org.example.api.services;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.example.api.dto.request.ProfileRegistrationRequestDto;
 import org.example.api.dto.request.ProfileUpdateRequestDto;
 import org.example.api.dto.response.DelProfileResponseDto;
@@ -20,25 +21,27 @@ import java.util.UUID;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Slf4j
 public class ProfileService {
     ProfileRepository profileRepository;
 
-    public ProfileEntity registerProfile(ProfileRegistrationRequestDto dto) {
-        throwExceptionIfProfileWithEmailAlreadyExists(dto.getEmail());
-        ProfileEntity profileEntity = buildProfileEntity(dto);
+    public ProfileEntity registerProfile(UUID userId, ProfileRegistrationRequestDto dto) {
+        throwExceptionIfProfileWithIdAlreadyExists(userId);
+        ProfileEntity profileEntity = buildProfileEntity(userId, dto);
         return profileRepository.save(profileEntity);
     }
 
-    private void throwExceptionIfProfileWithEmailAlreadyExists(String email) {
-        profileRepository.findByEmail(email)
+    private void throwExceptionIfProfileWithIdAlreadyExists(UUID id) {
+        profileRepository.findById(id)
                 .ifPresent((profile -> {
-                    throw new BadRequestException(String.format("Account with email \"%s\" already exists.", email));
+                    log.warn("Attempt to create profile with existing ID: {}", id);
+                    throw new BadRequestException(String.format("Account with id \"%s\" already exists.", id));
                 }));
     }
 
-    private ProfileEntity buildProfileEntity(ProfileRegistrationRequestDto dto) {
+    private ProfileEntity buildProfileEntity(UUID id, ProfileRegistrationRequestDto dto) {
         return ProfileEntity.builder()
-                .email(dto.getEmail())
+                .id(id)
                 .name(dto.getName())
                 .surname(dto.getSurname())
                 .roles(getRolesListByString(dto.getRoles()))
@@ -46,12 +49,14 @@ public class ProfileService {
     }
 
     private List<String> getRolesListByString(String rolesString) {
-        if (rolesString.trim().isEmpty())
+        if (rolesString.trim().isEmpty()) {
+            log.debug("Roles string is empty, returning empty list");
             return Collections.emptyList();
-
-        return Arrays.asList(rolesString.split(","));
+        }
+        List<String> roles = Arrays.asList(rolesString.split(","));
+        log.debug("Parsed {} roles", roles.size());
+        return roles;
     }
-
 
     public ProfileEntity updateProfile(UUID profileId, ProfileUpdateRequestDto dto) {
         ProfileEntity existingProfileEntity = getProfileByIdOrThrowException(profileId);
@@ -61,12 +66,14 @@ public class ProfileService {
 
     public ProfileEntity getProfileByIdOrThrowException(UUID id) {
         return profileRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("Account with id \"%s\" does not exist", id)));
+                .orElseThrow(() -> {
+                    log.warn("Attempt to get profile with does not exist if: {}", id);
+                    return new NotFoundException(String.format("Account with id \"%s\" does not exist", id));
+                });
     }
 
     private ProfileEntity mergeProfileUpdatesIntoEntity(ProfileEntity profileEntity,
                                               ProfileUpdateRequestDto updatedDto) {
-        profileEntity.setEmail(updatedDto.getEmail());
         profileEntity.setName(updatedDto.getName());
         profileEntity.setSurname(updatedDto.getSurname());
         profileEntity.setDescription(updatedDto.getDescription());
