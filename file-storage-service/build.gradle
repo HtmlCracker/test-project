@@ -39,6 +39,16 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok:1.18.30"
 }
 
+// Jaeger
+dependencies {
+    implementation 'io.opentelemetry:opentelemetry-api:1.32.0'
+    implementation 'io.opentelemetry:opentelemetry-sdk:1.32.0'
+    implementation 'io.opentelemetry:opentelemetry-exporter-jaeger:1.32.0'
+    implementation 'io.opentelemetry:opentelemetry-sdk-trace:1.32.0'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:1.26.0-alpha'
+}
+
 // Spring boot
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'

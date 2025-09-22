@@ -67,12 +67,29 @@ services:
     volumes:
       - ./logs:/app/logs
     build: email-service
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - OTEL_SERVICE_NAME=email-service
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_EXPORTER_JAEGER_ENABLED=false
     depends_on:
       - kafka
       - consul
       - vault
+      - jaeger
     ports:
       - 45292:45292
+    networks:
+      - consul-net
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.48
+    container_name: jaeger
+    ports:
+      - "16686:16686"   # Web UI
+      - "4317:4317"     # OTLP gRPC
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
     networks:
       - consul-net
 
@@ -80,12 +97,18 @@ services:
     container_name: security-service
     env_file: ./security-service/src/main/resources/application.env
     build: ./security-service
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - OTEL_SERVICE_NAME=security-service
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_EXPORTER_JAEGER_ENABLED=false
     ports:
       - '8765:8765'
     depends_on:
       - kafka
       - consul
       - usersDB
+      - jaeger
     networks:
       - consul-net
 
@@ -108,10 +131,16 @@ services:
   profile-service:
     container_name: profile-service
     build: profile-service
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - OTEL_SERVICE_NAME=profile-service
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_EXPORTER_JAEGER_ENABLED=false
     depends_on:
       - profileDb
       - kafka
       - consul
+      - jaeger
     ports:
       - 45291:45291
     networks:
@@ -141,6 +170,12 @@ services:
       - fileStorageDb
       - consul
       - vault
+      - jaeger
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - OTEL_SERVICE_NAME=file-storage-service
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_EXPORTER_JAEGER_ENABLED=false
     ports:
       - 45295:45295
     networks:

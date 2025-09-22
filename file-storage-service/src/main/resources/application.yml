@@ -13,6 +13,17 @@ PATH_TO_DECRYPTED_STORAGE: /files/get/decrypted-storage
 PATH_TO_DECOMPRESSED_STORAGE: /files/get/decompressed-storage
 PATH_TO_READY_FOR_GET_STORAGE: /files/get/ready-for-get-storage
 
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://jaeger:4317
+
+opentelemetry:
+  service-name: ${spring.application.name}
+
 compression:
   text-type: text
   binary-type: application

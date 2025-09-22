@@ -43,6 +43,16 @@ dependencies {
     implementation 'ognl:ognl:3.3.4'
 }
 
+// Jaeger
+dependencies {
+    implementation 'io.opentelemetry:opentelemetry-api:1.32.0'
+    implementation 'io.opentelemetry:opentelemetry-sdk:1.32.0'
+    implementation 'io.opentelemetry:opentelemetry-exporter-jaeger:1.32.0'
+    implementation 'io.opentelemetry:opentelemetry-sdk-trace:1.32.0'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:1.26.0-alpha'
+}
+
 // Consul
 dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-consul-discovery'

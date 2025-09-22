@@ -28,7 +28,19 @@ spring:
       host: http://consul
       discovery:
         health-check-url: http://security-service:8765/actuator/health
+
 server:
   port: 8765
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://jaeger:4317
+
+opentelemetry:
+  service-name: ${spring.application.name}
 
 jwt_secret: ${JWT_SECRET}

@@ -12,6 +12,17 @@ logging:
     file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://jaeger:4317
+
+opentelemetry:
+  service-name: ${spring.application.name}
+
 spring:
   application:
     name: email-sender-service
