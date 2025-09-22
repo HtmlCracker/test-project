@@ -57,6 +57,7 @@ public class UserService {
                 LocalDateTime.now(),
                 false);
         emailVerifyService.sendVerifyToken(userRequestDto.getEmail());
+        userRepository.save(user);
         return "User has been registered";
     }
 
