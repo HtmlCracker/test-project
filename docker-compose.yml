@@ -62,6 +62,40 @@ services:
     networks:
       - consul-net
 
+  project-profile-service:
+    container_name: project-profile-service
+    build: project-profile-service
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - OTEL_SERVICE_NAME=project-profile-service
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_EXPORTER_JAEGER_ENABLED=false
+    depends_on:
+      - jaeger
+      - consul
+      - vault
+      - projectProfileDB
+    ports:
+      - 45290:45290
+    networks:
+      - consul-net
+
+  projectProfileDB:
+    image: postgres:alpine
+    container_name: projectProfileDB
+    hostname: projectProfileDB
+    ports:
+      - '5429:5429'
+    environment:
+      POSTGRES_DB: projectProfileDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - ./projectProfileDB:/data
+    networks:
+      - consul-net
+
   email-service:
     container_name: email-service
     volumes:

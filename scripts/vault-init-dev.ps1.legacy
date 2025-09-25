@@ -52,3 +52,11 @@ $profileDbSecrets = @{
     "DBPassword" = "postgres"
 }
 Save-Secret "database/profileDb" $profileDbSecrets
+
+# Секреты projectProfileDB
+$projectProfileDBSecrets = @{
+    "DBUrl" = "jdbc:postgresql://projectProfileDB:5432/projectProfileDB"
+    "DBUsername" = "postgres"
+    "DBPassword" = "postgres"
+}
+Save-Secret "database/projectProfileDB" $projectProfileDBSecrets

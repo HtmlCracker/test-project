@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: project-profile-service
+  cloud:
+    vault:
+      uri: http://vault:8200
+      token: root
+      kv:
+        enabled: true
+        backend: secret
+        application-name: database/projectProfileDB
+      fail-fast: true

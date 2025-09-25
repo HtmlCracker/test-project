@@ -1,0 +1,46 @@
+server:
+  port: 45290
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    com.example: ERROR
+  file:
+    name: /app/logs/project-profile-service.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://jaeger:4317
+
+opentelemetry:
+  service-name: ${spring.application.name}
+
+spring:
+  application:
+    name: project-profile-service
+
+  datasource:
+    url: ${DBUrl}
+    username: ${DBUsername}
+    password: ${DBPassword}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+
+  cloud:
+    consul:
+      host: http://consul
+      port: 8500

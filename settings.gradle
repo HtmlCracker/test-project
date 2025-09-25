@@ -4,3 +4,5 @@ include 'profile-service'
 include 'email-service'
 include 'security-service'
 include 'file-storage-service'
+include 'project-profile-service'
+
