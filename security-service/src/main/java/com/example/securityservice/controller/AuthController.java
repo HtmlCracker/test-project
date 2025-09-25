@@ -28,7 +28,12 @@ public class AuthController {
     private final ProducerService producerService;
 
     @Autowired
-    public AuthController(UserService userService, JwtService jwtService, RefreshTokenService refreshTokenService, AuthenticationManager authenticationManager, EmailVerifyService emailVerifyService, ProducerService producerService) {
+    public AuthController(UserService userService,
+                          JwtService jwtService,
+                          RefreshTokenService refreshTokenService,
+                          AuthenticationManager authenticationManager,
+                          EmailVerifyService emailVerifyService,
+                          ProducerService producerService) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
@@ -81,17 +86,22 @@ public class AuthController {
 
     @PostMapping("/token")
     public String getToken(@Valid @RequestBody UserRequestDto userRequestDto) {
-        User user = userService.findByEmail(userRequestDto.getEmail()).orElseThrow(EntityNotFoundException::new);
-        if (!user.isEnabled())
+        User user = userService.findByEmail(
+                userRequestDto.getEmail()).orElseThrow(EntityNotFoundException::new
+        );
+        if (!user.isEnabled()) {
             return "Your account is not activated";
+        }
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                userRequestDto.getEmail(),
-                userRequestDto.getPassword()));
-        if (authentication.isAuthenticated())
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                    userRequestDto.getEmail(),
+                    userRequestDto.getPassword()
+                ));
+        if (authentication.isAuthenticated()) {
             return "Your JWT token: " + jwtService.generateToken(user) + "\n" +
                     "Your Refresh token: " + refreshTokenService.createRefreshToken(user);
-
+        }
         return "Invalid username or password";
     }
 
@@ -103,10 +113,15 @@ public class AuthController {
     @GetMapping("/validate")
     public String isTokenValid(@RequestParam("token") String token) {
         try {
-            User user = userService.findByEmail(jwtService.extractEmail(token)).orElseThrow(EntityNotFoundException::new);
-            if (jwtService.isTokenValid(token, user))
+            User user = userService.findByEmail(jwtService.extractEmail(token)).orElseThrow(
+                    EntityNotFoundException::new
+            );
+            if (jwtService.isTokenValid(token, user)) {
                 return "Token is valid";
-        } catch (ExpiredJwtException e) {}
+            }
+        } catch (ExpiredJwtException e) {
+            return "Invalid token";
+        }
         return "Invalid token";
     }
 }
