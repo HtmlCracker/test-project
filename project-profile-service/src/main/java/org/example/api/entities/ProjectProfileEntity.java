@@ -15,7 +15,6 @@ import java.util.UUID;
 @Setter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "project_profile")
@@ -30,11 +29,13 @@ public class ProjectProfileEntity {
 
     String description;
 
-    @Builder.Default
-    Boolean isPublic = false;
+    @Column(nullable = false)
+    Boolean isPublic;
 
     @Column(nullable = false)
     List<String> tags;
+
+    UUID chatId;
 
     UUID avatarId;
 
