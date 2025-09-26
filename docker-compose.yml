@@ -65,6 +65,8 @@ services:
   project-profile-service:
     container_name: project-profile-service
     build: project-profile-service
+    volumes:
+      - ./logs/project-profile-service:/app/logs/project-profile-service
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
       - OTEL_SERVICE_NAME=project-profile-service
@@ -99,7 +101,7 @@ services:
   email-service:
     container_name: email-service
     volumes:
-      - ./logs:/app/logs
+      - ./logs/email-service:/app/logs/email-service
     build: email-service
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
