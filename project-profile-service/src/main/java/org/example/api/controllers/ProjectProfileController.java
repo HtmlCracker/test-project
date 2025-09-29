@@ -5,7 +5,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.pqc.crypto.newhope.NHSecretKeyProcessor;
 import org.example.api.dto.request.DeleteProjectProfileRequestDto;
+import org.example.api.dto.request.JoinToProjectRequestDto;
 import org.example.api.dto.request.ProjectProfileRequestDto;
 import org.example.api.dto.response.DeleteProjectProfileResponseDto;
 import org.example.api.dto.response.ProjectProfileResponseDto;
@@ -28,6 +30,15 @@ public class ProjectProfileController {
     public static final String UPDATE_PROJECT_PROFILE = "api/private/projects/update/{projectProfileId}";
     public static final String DELETE_PROJECT_PROFILE = "api/private/projects/delete";
     public static final String GET_PROJECT_PROFILE = "api/private/projects/get/{projectProfileId}";
+    public static final String SEND_JOIN_TO_PROJECT_REQUEST = "api/private/projects/join";
+
+    @PostMapping(SEND_JOIN_TO_PROJECT_REQUEST)
+    public String sendJoinToProjectRequest(@RequestBody JoinToProjectRequestDto dto) {
+        log.info("Starting join project operation, with request: {}", dto);
+        profileService.sendJoinToProjectRequest(dto);
+        log.info("Join request saved successfully, with request: {}", dto);
+        return "ok";
+    }
 
     @PostMapping(REGISTRATION_PROJECT_PROFILE)
     public ProjectProfileResponseDto registrationProjectProfile(

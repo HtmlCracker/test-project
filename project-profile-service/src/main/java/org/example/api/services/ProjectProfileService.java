@@ -5,14 +5,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.example.api.dto.request.DeleteProjectProfileRequestDto;
+import org.example.api.dto.request.JoinToProjectRequestDto;
 import org.example.api.dto.request.ProjectProfileRequestDto;
 import org.example.api.dto.response.DeleteProjectProfileResponseDto;
+import org.example.api.entities.JoinRequestEntity;
 import org.example.api.entities.ProjectProfileEntity;
+import org.example.api.enums.JoinRequestStatus;
 import org.example.api.exceptions.BadRequestException;
 import org.example.api.exceptions.NotFoundException;
+import org.example.api.repositories.JoinRequestRepository;
 import org.example.api.repositories.ProjectProfileRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -22,6 +25,28 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProjectProfileService {
     ProjectProfileRepository projectProfileRepository;
+    JoinRequestRepository joinRequestRepository;
+
+    public void sendJoinToProjectRequest(JoinToProjectRequestDto dto) {
+        boolean existingRequest = joinRequestRepository.existsByUserIdAndProjectProfileId(
+                dto.getUserId(),
+                dto.getProjectProfileId()
+        );
+        if (existingRequest) {
+            throw new BadRequestException("You already have a pending join request for this project");
+        }
+        ProjectProfileEntity projectProfileEntity = projectProfileRepository.findById(dto.getProjectProfileId())
+                .orElseThrow(() -> new NotFoundException(
+                        "Project profile not found with id: " + dto.getProjectProfileId()
+                ));
+        JoinRequestEntity joinRequestEntity = joinRequestEntityBuilder(
+                dto.getUserId(),
+                projectProfileEntity,
+                dto.getMessage()
+        );
+        joinRequestRepository.save(joinRequestEntity);
+        log.error(joinRequestEntity.getId().toString() + " " + joinRequestEntity.getMessage());
+    }
 
     public ProjectProfileEntity getProjectProfile(UUID projectProfileId) {
         return projectProfileRepository.findById(projectProfileId)
@@ -86,6 +111,18 @@ public class ProjectProfileService {
                 .tags(dto.getTags())
                 .adminIds(dto.getAdminIds())
                 .memberIds(dto.getMemberIds())
+                .build();
+    }
+
+    private JoinRequestEntity joinRequestEntityBuilder(
+            UUID userId,
+            ProjectProfileEntity projectProfileEntity,
+            String message
+    ) {
+        return JoinRequestEntity.builder()
+                .userId(userId)
+                .projectProfile(projectProfileEntity)
+                .message(message)
                 .build();
     }
 }

@@ -35,7 +35,8 @@ public class JoinRequestEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    JoinRequestStatus status;
+    @Builder.Default
+    JoinRequestStatus status = JoinRequestStatus.PENDING;
 
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
