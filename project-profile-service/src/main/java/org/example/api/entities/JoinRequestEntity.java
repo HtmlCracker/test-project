@@ -3,13 +3,11 @@ package org.example.api.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.example.api.enums.JoinRequestStatus;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -19,36 +17,25 @@ import java.util.UUID;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "project_profile")
-public class ProjectProfileEntity {
+@Table(name = "join_request")
+public class JoinRequestEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false, nullable = false)
     UUID id;
 
+    @Column(updatable = false, nullable = false)
+    UUID userId;
+
+    String message;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_profile_id", nullable = false)
+    ProjectProfileEntity projectProfile;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    String projectName;
-
-    String description;
-
-    @Column(nullable = false)
-    Boolean isPublic;
-
-    @Column(nullable = false)
-    List<String> tags;
-
-    UUID chatId;
-
-    UUID avatarId;
-
-    @Column(nullable = false)
-    List<UUID> adminIds;
-
-    @Column(nullable = false)
-    List<UUID> memberIds;
-
-    @OneToMany(mappedBy = "projectProfile", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<JoinRequestEntity> joinRequests = new ArrayList<>();
+    JoinRequestStatus status;
 
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
