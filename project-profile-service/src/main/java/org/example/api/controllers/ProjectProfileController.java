@@ -30,7 +30,8 @@ public class ProjectProfileController {
     public static final String GET_PROJECT_PROFILE = "api/private/projects/get/{projectProfileId}";
 
     @PostMapping(REGISTRATION_PROJECT_PROFILE)
-    public ProjectProfileResponseDto registrationProjectProfile(@Valid @RequestBody ProjectProfileRequestDto dto) {
+    public ProjectProfileResponseDto registrationProjectProfile(
+            @Valid @RequestBody ProjectProfileRequestDto dto) {
         log.info("Starting project profile registration, with request: {}", dto);
         ProjectProfileEntity savedProfileEntity = profileService.saveProjectProfileEntity(dto);
         log.info("Profile saved successfully. Profile ID: {}", savedProfileEntity.getId());
@@ -38,8 +39,9 @@ public class ProjectProfileController {
     }
 
     @PutMapping(UPDATE_PROJECT_PROFILE)
-    public ProjectProfileResponseDto updateProjectProfile(@PathVariable UUID projectProfileId,
-                                                          @Valid @RequestBody ProjectProfileRequestDto dto) {
+    public ProjectProfileResponseDto updateProjectProfile(
+            @PathVariable UUID projectProfileId,
+            @Valid @RequestBody ProjectProfileRequestDto dto) {
         log.info("Starting project profile update, with request: {}", dto);
         ProjectProfileEntity savedProfileEntity = profileService.updateProjectProfile(
                 projectProfileId, dto
