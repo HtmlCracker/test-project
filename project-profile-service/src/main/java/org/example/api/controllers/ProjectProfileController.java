@@ -5,7 +5,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.example.api.dto.request.DeleteProjectProfileRequestDto;
 import org.example.api.dto.request.ProjectProfileRequestDto;
+import org.example.api.dto.response.DeleteProjectProfileResponseDto;
 import org.example.api.dto.response.ProjectProfileResponseDto;
 import org.example.api.entities.ProjectProfileEntity;
 import org.example.api.factories.ProjectProfileResponseDtoFactory;
@@ -24,6 +26,8 @@ public class ProjectProfileController {
 
     public static final String REGISTRATION_PROJECT_PROFILE = "api/private/projects/registration";
     public static final String UPDATE_PROJECT_PROFILE = "api/private/projects/update/{projectProfileId}";
+    public static final String DELETE_PROJECT_PROFILE = "api/private/projects/delete";
+    public static final String GET_PROJECT_PROFILE = "api/private/projects/get/{projectProfileId}";
 
     @PostMapping(REGISTRATION_PROJECT_PROFILE)
     public ProjectProfileResponseDto registrationProjectProfile(@Valid @RequestBody ProjectProfileRequestDto dto) {
@@ -42,5 +46,20 @@ public class ProjectProfileController {
         );
         log.info("Profile updated successfully. Profile ID: {}", savedProfileEntity.getId());
         return projectProfileResponseDtoFactory.makeDto(savedProfileEntity);
+    }
+
+    @DeleteMapping(DELETE_PROJECT_PROFILE)
+    public DeleteProjectProfileResponseDto deleteProjectProfile(
+            @Valid @RequestBody DeleteProjectProfileRequestDto dto) {
+        log.info("Starting project profile delete, with request: {}", dto);
+        return profileService.deleteProjectProfile(dto);
+    }
+
+    @GetMapping(GET_PROJECT_PROFILE)
+    public ProjectProfileResponseDto getProjectProfile(@PathVariable UUID projectProfileId) {
+        log.info("Starting project profile get, with projectProfileId: {}", projectProfileId);
+        ProjectProfileEntity entity = profileService.getProjectProfile(projectProfileId);
+        log.info("Profile got successfully. Profile ID: {}", projectProfileId);
+        return projectProfileResponseDtoFactory.makeDto(entity);
     }
 }
