@@ -8,6 +8,7 @@ import com.example.chatservice.entity.ChatMessage;
 import com.example.chatservice.repository.ChatMemberRepository;
 import com.example.chatservice.service.ChatMessageService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import reactor.kafka.sender.KafkaSender;
 import reactor.kafka.sender.SenderRecord;
 import reactor.util.retry.Retry;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class KafkaProducer {
     private final KafkaSender<UUID, Message> kafkaSender;
     private final KafkaSender<UUID, ReadReceipt> readReceiptKafkaSender;
@@ -40,25 +43,30 @@ public class KafkaProducer {
                 .toList();
         // Создаем поток сообщений для отправки
         Flux<SenderRecord<UUID, Message, UUID>> records = Flux.fromIterable(participantIds)
-                .map(participantId ->
-                        SenderRecord.create(
-                                // topic, key (chatId для партиционирования), value (message)
-                                new ProducerRecord<>("direct_messages", message.getChatId(), toMessageDto(chatMessage)),
-                                participantId  // Correlation metadata (recipientId)
-                        )
-                );
+                .map(participantId ->{
+                    ProducerRecord<UUID, Message> record = new ProducerRecord<>(
+                            "direct_messages",
+                            message.getChatId(),
+                            toMessageDto(chatMessage)
+                    );
+
+                    record.headers().add("correlationId", participantId.toString().getBytes(StandardCharsets.UTF_8));
+
+                    return SenderRecord.create(record, participantId);
+                });
+
         // Отправляем сообщения асинхронно
         kafkaSender.send(records)
                 .doOnError(e ->
-                        System.err.println("Error sending message to Kafka: " + e.getMessage())
+                        log.error("Error sending message to Kafka: " + e.getMessage())
                 )
                 .doOnComplete(() ->
-                        System.out.println("Successfully sent " + participantIds.size() + " messages")
+                        log.info("Successfully sent " + participantIds.size() + " messages")
                 )
                 .retryWhen(
                         Retry.backoff(3, Duration.ofMillis(100))
                                 .doBeforeRetry(retrySignal -> {
-                                    System.out.println("Retry #" + retrySignal.totalRetries() +
+                                    log.info("Retry #" + retrySignal.totalRetries() +
                                             " for message send. Error: " + retrySignal.failure().getMessage());
                                 })
                 )

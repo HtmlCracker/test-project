@@ -18,16 +18,14 @@ spring:
           uri: lb://security-service
           predicates:
             - Path=/auth/**
+        - id: chat-service
+          uri: lb://chat-service
+          predicates:
+            - Path=/api/chats/**, /api/messages/**, /ws/**
         - id: publication-service
           uri: lb://profile-service
           predicates:
             - Path=/api/**
-        - id: chat-service
-          uri: lb://chat-service
-          predicates:
-            - Path=/ws/**
-          #filters:
-          #  - StripPrefix=1
     consul:
       host: http://consul
       port: 8500

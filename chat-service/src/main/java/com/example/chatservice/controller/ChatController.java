@@ -5,6 +5,7 @@ import com.example.chatservice.service.ChatMessageService;
 import com.example.chatservice.state.ChatType;
 import com.example.chatservice.util.JwtUtil;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/chats")
+@Slf4j
 public class ChatController {
     private final ChatMessageService chatMessageService;
     private final JwtUtil jwtUtil;
@@ -28,6 +30,8 @@ public class ChatController {
             @PathVariable UUID chatId) {
         String token = authHeader.substring(7);
         UUID userId = jwtUtil.extractUserId(token);
+
+        chatMessageService.markChatAsRead(userId, chatId);
 
         ChatDto chatDto = chatMessageService.getChatInfo(chatId, userId);
         return ResponseEntity.ok(chatDto);

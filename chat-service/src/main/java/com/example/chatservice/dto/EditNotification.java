@@ -14,8 +14,6 @@ public class EditNotification {
     private UUID senderId;
     private String newText;
     private LocalDateTime editedAt;
-    private UUID editorId;
-    private String editorName;
 
     public Message toMessage() {
         Message message = new Message();
@@ -26,10 +24,6 @@ public class EditNotification {
         message.setChatId(this.chatId);
         message.setEditNotification(true);
 
-        message.setMetadata(Map.of(
-                "editorId", this.editorId.toString(),
-                "editorName", this.editorName
-        ));
         return message;
     }
 
@@ -37,7 +31,6 @@ public class EditNotification {
         EditNotification notification = new EditNotification();
         notification.setMessageId(message.getId());
         notification.setNewText(message.getText());
-        notification.setEditorName(editorName);
         notification.setSenderId(message.getSenderId());
         notification.setChatId(message.getChatId());
         return notification;

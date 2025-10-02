@@ -18,11 +18,22 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, UUID> 
     Page<ChatMessage> findByChatId(UUID chatId, Pageable pageable);
     Optional<ChatMessage> findTopByChatIdOrderByTimestampDesc(UUID chatId);
     @Query("SELECT m FROM ChatMessage m " +
-            "JOIN ChatMember cm ON m.chatId = cm.chat.id " +
-            "WHERE cm.userId = :userId " +
-            "AND m.timestamp > :since " +
-            "AND NOT EXISTS (SELECT 1 FROM MessageReadStatus rs WHERE rs.messageId = m.id AND rs.userId = :userId)")
+            "WHERE m.chatId = :chatId " +
+            "AND NOT EXISTS (" +
+            "    SELECT rs FROM MessageReadStatus rs " +
+            "    WHERE rs.messageId = m.id AND rs.userId = :userId" +
+            ")")
     List<ChatMessage> findUnreadMessagesForUser(
             @Param("userId") UUID userId,
-            @Param("since") LocalDateTime since);
+            @Param("chatId") UUID chatId);
+
+    @Query("SELECT COUNT(m) FROM ChatMessage m " +
+            "WHERE m.chatId = :chatId " +
+            "AND NOT EXISTS (" +
+            "    SELECT rs FROM MessageReadStatus rs " +
+            "    WHERE rs.messageId = m.id AND rs.userId = :userId" +
+            ")")
+    long countUnreadMessagesForUser(
+            @Param("userId") UUID userId,
+            @Param("chatId") UUID chatId);
 }

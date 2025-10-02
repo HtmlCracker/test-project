@@ -93,7 +93,7 @@ services:
     container_name: usersDB
     hostname: usersDB
     ports:
-      - '5430:5430'
+      - '5430:5432'
     environment:
       POSTGRES_DB: usersDB
       POSTGRES_USER: postgres
@@ -121,7 +121,7 @@ services:
     hostname: profileDb
     container_name: profileDb
     ports:
-      - 5431:5431
+      - 5431:5432
     environment:
       POSTGRES_DB: profileDb
       POSTGRES_USER: postgres

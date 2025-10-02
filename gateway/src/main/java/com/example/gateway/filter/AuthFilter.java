@@ -1,5 +1,8 @@
 package com.example.gateway.filter;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -19,6 +22,7 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
 
     private final RouteValidator routeValidator;
     private final RestTemplate restTemplate;
+    Logger log = LoggerFactory.getLogger(AuthFilter.class);
 
     @Value("${validateUrl}")
     private String validateUrl;
@@ -34,8 +38,12 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
 
+            if (HttpMethod.OPTIONS.equals(request.getMethod())) {
+                return chain.filter(exchange);
+            }
+
             if (routeValidator.isSecured.test(request)) {
-                String token = extractTokenFromHeaders(request);
+                String token = extractToken(request);
 
                 if (token == null) {
                     throw new RuntimeException("Missing authorization token!");
@@ -47,7 +55,6 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
                 );
 
                 ResponseEntity<String> response = restTemplate.exchange(requestEntity, String.class);
-
                 if ("Invalid token".equals(response.getBody())) {
                     throw new RuntimeException("Invalid token");
                 }
@@ -58,21 +65,37 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
                             .queryParam("token", token)
                             .build()
                             .toUri();
-                    exchange.getRequest().mutate().uri(newUri);
+                    ServerHttpRequest newRequest = exchange.getRequest().mutate().uri(newUri).build();
+                    exchange = exchange.mutate().request(newRequest).build();
+                    log.info("New URI: {}", newUri);
                 }
             }
-
+            log.info("[GATEWAY] Обрабатываем защищенный запрос: {} {}", request.getMethod(), request.getURI());
             return chain.filter(exchange);
         };
     }
 
-    private String extractTokenFromHeaders(ServerHttpRequest request) {
+    private String extractToken(ServerHttpRequest request) {
+        // Проверяем query параметры для WebSocket
+        if (isWebSocketRequest(request)) {
+            String token = request.getQueryParams().getFirst("token");
+            if (token != null && !token.isEmpty()) {
+                return token;
+            }
+        }
+
+        // Для остального
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
         }
         return null;
     }
+
+    private boolean isWebSocketRequest(ServerHttpRequest request) {
+        return request.getURI().getPath().startsWith("/ws");
+    }
+
     public static class Config{
 
     }

@@ -12,8 +12,10 @@ import org.example.api.dto.response.ProfileResponseDto;
 import org.example.api.entities.ProfileEntity;
 import org.example.api.factories.ProfileDtoFactory;
 import org.example.api.services.ProfileService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -52,5 +54,11 @@ public class ProfileController {
     @DeleteMapping(DEL_PROFILE)
     public DelProfileResponseDto delProfile(@PathVariable UUID profileId) {
         return profileService.delProfile(profileId);
+    }
+
+    @GetMapping("api/public/accounts")
+    public ResponseEntity<List<ProfileResponseDto>> getProfilesByUserIds(@RequestParam List<UUID> userIds) {
+        List<ProfileEntity> profiles = profileService.getProfilesByUserIds(userIds);
+        return ResponseEntity.ok(profileDtoFactory.makeProfileDtoList(profiles));
     }
 }

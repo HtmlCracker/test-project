@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -89,5 +90,9 @@ public class ProfileService {
     public ProfileEntity getProfileByEmailOrThrowException(String email) {
         return profileRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(String.format("Account with id \"%s\" does not exist", email)));
+    }
+
+    public List<ProfileEntity> getProfilesByUserIds(List<UUID> userIds) {
+        return profileRepository.findAllById(userIds);
     }
 }

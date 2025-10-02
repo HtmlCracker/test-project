@@ -1,7 +1,9 @@
 package com.example.chatservice.controller;
 
+import com.example.chatservice.dto.EditNotification;
 import com.example.chatservice.dto.Message;
 import com.example.chatservice.entity.ChatMessage;
+import com.example.chatservice.kafka.KafkaProducer;
 import com.example.chatservice.service.ChatMessageService;
 import com.example.chatservice.util.JwtUtil;
 import org.springframework.data.domain.Page;
@@ -9,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,10 +20,12 @@ import java.util.UUID;
 public class ChatMessageController {
     private final ChatMessageService chatMessageService;
     private final JwtUtil jwtUtil;
+    private final KafkaProducer kafkaProducer;
 
-    public ChatMessageController(ChatMessageService chatMessageService, JwtUtil jwtUtil) {
+    public ChatMessageController(ChatMessageService chatMessageService, JwtUtil jwtUtil, KafkaProducer kafkaProducer) {
         this.chatMessageService = chatMessageService;
         this.jwtUtil = jwtUtil;
+        this.kafkaProducer = kafkaProducer;
     }
 
     @GetMapping("/history/{chatId}")
@@ -34,7 +39,7 @@ public class ChatMessageController {
         if (chatId == null) {
             return ResponseEntity.badRequest().build();
         }
-        Page<Message> history = chatMessageService.getChatHistory(senderId, chatId, page, size);
+        Page<Message> history = chatMessageService.getChatHistory(chatId, senderId, page, size);
         return ResponseEntity.ok(history);
     }
 
@@ -47,6 +52,15 @@ public class ChatMessageController {
         UUID userId = jwtUtil.extractUserId(token);
 
         Message message = chatMessageService.editMessage(messageId, userId, newText);
+
+        EditNotification notification = new EditNotification();
+        notification.setMessageId(messageId);
+        notification.setChatId(message.getChatId());
+        notification.setSenderId(userId);
+        notification.setNewText(newText);
+        notification.setEditedAt(LocalDateTime.now());
+
+        kafkaProducer.sendEditNotification(notification);
         return ResponseEntity.ok(message);
     }
 

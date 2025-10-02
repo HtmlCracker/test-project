@@ -55,8 +55,9 @@ public class UserService {
                 userRequestDto.getEmail(),
                 passwordEncoder.encode(userRequestDto.getPassword()),
                 LocalDateTime.now(),
-                false);
-        emailVerifyService.sendVerifyToken(userRequestDto.getEmail());
+                true);
+        // emailVerifyService.sendVerifyToken(userRequestDto.getEmail());
+        //TODO ВЕРНУТЬ КАК БЫЛО!!!!!!!!!!!!!!!!!!!!!
         userRepository.save(user);
         return "User has been registered";
     }

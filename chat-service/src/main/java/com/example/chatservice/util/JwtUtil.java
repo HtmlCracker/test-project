@@ -18,7 +18,6 @@ public class JwtUtil {
 
     public UUID extractUserId(String token) {
         try {
-
             String payload = extractPayload(token);
             Map<String, Object> claims = parseClaims(payload);
             String userIdStr = (String) claims.get("userId");

@@ -13,7 +13,6 @@ public class ChatDto {
     private ChatType type;
     private String name;
     private LocalDateTime createdAt;
-    private UUID createdBy;
     private List<ChatParticipantDto> participants;
     private Message lastMessage;
 }

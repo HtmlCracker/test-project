@@ -1,6 +1,6 @@
 spring:
   application:
-    name: email-sender-service
+    name: email-service
   cloud:
     vault:
       uri: http://vault:8200
@@ -8,5 +8,5 @@ spring:
       kv:
         enabled: true
         backend: secret
-        application-name: services/email-sender-service
+        application-name: services/email-service
       fail-fast: true

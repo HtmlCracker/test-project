@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(name = "profile-service", url = "http://profile-service:45291")
+@FeignClient(name = "profile-service")
 public interface ProfileClient {
     @GetMapping("api/public/accounts/get/{profileId}")
     ProfileDto getProfileDto(@PathVariable UUID userId);
 
-    @GetMapping("api/public/accounts/")
-    List<ProfileDto> getProfilesByUserIds(@RequestParam List<UUID> userIds); //todo реализовать
+    @GetMapping("api/public/accounts")
+    List<ProfileDto> getProfilesByUserIds(@RequestParam List<UUID> userIds);
 }

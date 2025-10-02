@@ -15,7 +15,9 @@ import com.example.chatservice.repository.ChatRepository;
 import com.example.chatservice.repository.MessageReadStatusRepository;
 import com.example.chatservice.state.ChatType;
 import com.example.chatservice.state.MessageState;
+import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,9 +27,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -41,8 +45,16 @@ public class ChatMessageService {
 
     public UUID createChat(List<UUID> participantIds, String name, ChatType type, UUID createdBy) {
         List<ProfileDto> members = profileClient.getProfilesByUserIds(participantIds);
-        if (members.size() != participantIds.size()) {
+        if (members.size() != participantIds.size())
             throw new IllegalArgumentException("One or more users not found");
+
+        if (type == ChatType.DIRECT && participantIds.size() == 2) {
+            UUID userId1 = participantIds.get(0);
+            UUID userId2 = participantIds.get(1);
+
+            Optional<Chat> existingChat = chatRepository.findDirectChatBetweenUsers(userId1, userId2);
+            if (existingChat.isPresent())
+                throw new EntityExistsException("Chat with this user already exists");
         }
 
         Chat chat = new Chat();
@@ -50,6 +62,12 @@ public class ChatMessageService {
         chat.setName(name);
         chat.setCreatedAt(LocalDateTime.now());
         chatRepository.save(chat);
+
+        ChatMember owner = new ChatMember();
+        owner.setChat(chat);
+        owner.setUserId(createdBy);
+        owner.setJoinedAt(LocalDateTime.now());
+        chatMemberRepository.save(owner);
 
         for (UUID participantId : participantIds) {
             ChatMember member = new ChatMember();
@@ -152,6 +170,7 @@ public class ChatMessageService {
 
     public List<ChatDto> getUserChats(UUID userId) {
         List<Chat> chats = chatRepository.findByParticipantId(userId);
+        log.info("[CHAT-SERVICE] Найдены чаты : {}", chats);
         return chats.stream()
                 .map(chat -> getChatInfo(chat.getId(), userId))
                 .collect(Collectors.toList());
@@ -206,6 +225,9 @@ public class ChatMessageService {
 
         readStatus.setReadAt(LocalDateTime.now());
         readStatusRepository.save(readStatus);
+
+        message.setReadAt(readStatus.getReadAt());
+        chatMessageRepository.save(message);
     }
 
     public void markAsDelivered(UUID messageId) {
@@ -253,13 +275,22 @@ public class ChatMessageService {
                 .orElseThrow(() -> new IllegalArgumentException("Message not found"));
     }
 
-    public List<Message> getUnreadMessages(UUID userId) {
-        //todo сделать с момента когда последний раз был онлайн
-        //вообще эта х***я с онлайном должна быть в profile-service, но я хз как это сделать
-        //господи боже помоги!!!
-        LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
+    public void markChatAsRead(UUID userId, UUID chatId) {
+        if (!isChatParticipant(chatId, userId)) {
+            throw new IllegalArgumentException("User is not a participant of the chat");
+        }
 
-        return chatMessageRepository.findUnreadMessagesForUser(userId, twentyFourHoursAgo).stream().map(this::toMessage).collect(Collectors.toList());
+        try {
+            List<ChatMessage> unreadMessages = chatMessageRepository.findUnreadMessagesForUser(userId, chatId);
+            log.debug("[CHAT-SERVICE] Найдено {} непрочитанных сообщений в чате {}", unreadMessages.size(), chatId);
+
+            for (ChatMessage message : unreadMessages) {
+                markAsRead(message.getId(), userId);
+            }
+        } catch (Exception e) {
+            log.error("[CHAT-SERVICE] Ошибка при отметке сообщений чата {} как прочитанных", chatId, e);
+            throw e;
+        }
     }
 
     private ChatMessage toChatMessage(Message message) {
@@ -276,6 +307,7 @@ public class ChatMessageService {
 
     private Message toMessage(ChatMessage chatMessage) {
         Message message = new Message();
+        message.setMessageId(chatMessage.getId());
         message.setSenderId(chatMessage.getSenderId());
         message.setChatId(chatMessage.getChatId());
         message.setText(chatMessage.getText());
@@ -289,6 +321,4 @@ public class ChatMessageService {
     private boolean isChatParticipant(UUID chatId, UUID userId) {
         return chatMemberRepository.existsByChatIdAndUserId(chatId, userId); //todo КЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭШ!!!!!!!!!!!!!!!!!!!!!
     }
-
-
 }

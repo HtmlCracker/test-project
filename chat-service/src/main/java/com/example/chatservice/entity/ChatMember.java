@@ -2,6 +2,8 @@ package com.example.chatservice.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -14,6 +16,8 @@ public class ChatMember {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "chat_id", nullable = false)
     private Chat chat;

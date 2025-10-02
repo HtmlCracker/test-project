@@ -3,6 +3,7 @@ package com.example.securityservice.controller;
 import com.example.securityservice.SecurityServiceApplication;
 import com.example.securityservice.dto.UserRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -23,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Slf4j
 @Testcontainers
 @SpringBootTest(classes = SecurityServiceApplication.class)
 @AutoConfigureMockMvc
@@ -176,7 +178,7 @@ public class AuthControllerTest {
 
     ResultActions sendRegisterRequest(UserRequestDto userRequestDto) throws Exception {
         String requestJson = objectMapper.writeValueAsString(userRequestDto);
-        return mockMvc.perform(post("http://localhost:8765/auth/register")
+        return mockMvc.perform(post("http://localhost:8765/auth/public/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson));
     }
