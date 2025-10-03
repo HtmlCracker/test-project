@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.example.api.dto.kafka.JoinToProjectKafkaDto;
 import org.example.api.dto.request.DeleteProjectProfileRequestDto;
 import org.example.api.dto.request.JoinToProjectRequestDto;
 import org.example.api.dto.request.ProjectProfileRequestDto;
@@ -17,6 +18,7 @@ import org.example.api.repositories.JoinRequestRepository;
 import org.example.api.repositories.ProjectProfileRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -27,25 +29,57 @@ public class ProjectProfileService {
     ProjectProfileRepository projectProfileRepository;
     JoinRequestRepository joinRequestRepository;
 
-    public void sendJoinToProjectRequest(JoinToProjectRequestDto dto) {
-        boolean existingRequest = joinRequestRepository.existsByUserIdAndProjectProfileId(
-                dto.getUserId(),
-                dto.getProjectProfileId()
+    ProducerService producerService;
+
+    public void sendJoinToProjectRequest(JoinToProjectRequestDto request) {
+        validateJoinRequest(request);
+
+        ProjectProfileEntity projectProfile = findProjectProfile(request.getProjectProfileId());
+        validateNoExistingRequest(request.getUserId(), projectProfile.getId());
+
+        JoinRequestEntity joinRequest = joinRequestEntityBuilder(
+                request.getUserId(),
+                projectProfile,
+                request.getMessage()
         );
-        if (existingRequest) {
+
+        joinRequestRepository.save(joinRequest);
+        notifyProjectAdmins(request, projectProfile.getAdminIds());
+    }
+
+    private void validateJoinRequest(JoinToProjectRequestDto request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Join request cannot be null");
+        }
+    }
+
+    private void validateNoExistingRequest(UUID userId, UUID projectProfileId) {
+        boolean hasExistingRequest = joinRequestRepository.existsByUserIdAndProjectProfileId(
+                userId, projectProfileId
+        );
+
+        if (hasExistingRequest) {
             throw new BadRequestException("You already have a pending join request for this project");
         }
-        ProjectProfileEntity projectProfileEntity = projectProfileRepository.findById(dto.getProjectProfileId())
+    }
+
+    private ProjectProfileEntity findProjectProfile(UUID projectProfileId) {
+        return projectProfileRepository.findById(projectProfileId)
                 .orElseThrow(() -> new NotFoundException(
-                        "Project profile not found with id: " + dto.getProjectProfileId()
+                        "Project profile not found with id: " + projectProfileId
                 ));
-        JoinRequestEntity joinRequestEntity = joinRequestEntityBuilder(
-                dto.getUserId(),
-                projectProfileEntity,
-                dto.getMessage()
-        );
-        joinRequestRepository.save(joinRequestEntity);
-        log.error(joinRequestEntity.getId().toString() + " " + joinRequestEntity.getMessage());
+    }
+
+    private void notifyProjectAdmins(JoinToProjectRequestDto request, List<UUID> adminIds) {
+        for (UUID adminId : adminIds) {
+            JoinToProjectKafkaDto message = JoinToProjectKafkaDto.builder()
+                    .adminId(adminId)
+                    .userId(request.getUserId())
+                    .message(request.getMessage())
+                    .build();
+
+            producerService.sendJoinToProjectMessage(message);
+        }
     }
 
     public ProjectProfileEntity getProjectProfile(UUID projectProfileId) {

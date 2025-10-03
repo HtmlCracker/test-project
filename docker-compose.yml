@@ -73,6 +73,7 @@ services:
       - OTEL_TRACES_EXPORTER=otlp
       - OTEL_EXPORTER_JAEGER_ENABLED=false
     depends_on:
+      - kafka
       - jaeger
       - consul
       - vault

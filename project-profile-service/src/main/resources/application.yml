@@ -30,7 +30,12 @@ opentelemetry:
 spring:
   application:
     name: project-profile-service
-
+  kafka:
+    producer:
+      bootstrap-servers: kafka:29092
+      auto-offset-reset: earliest
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
   datasource:
     url: ${DBUrl}
     username: ${DBUsername}

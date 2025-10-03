@@ -49,6 +49,11 @@ dependencies {
     implementation 'io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:1.26.0-alpha'
 }
 
+// Spring kafka
+dependencies {
+    implementation("org.springframework.kafka:spring-kafka:3.3.0")
+}
+
 // Spring boot
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
